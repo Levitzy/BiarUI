@@ -66,10 +66,296 @@ function GUI.new(title)
     
     self.componentStates = {}
     self.componentCallbacks = {}
+    self.componentAnimationDelay = 0
     
     self:makeDraggable()
     
     return self
+end
+
+function GUI:animateComponentIn(component)
+    component.BackgroundTransparency = 1
+    for _, child in pairs(component:GetChildren()) do
+        if child:IsA("GuiObject") then
+            child.BackgroundTransparency = 1
+            if child:IsA("TextLabel") or child:IsA("TextButton") or child:IsA("TextBox") then
+                child.TextTransparency = 1
+            end
+        end
+    end
+    
+    local fadeIn = TweenService:Create(component, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out, 0, false, self.componentAnimationDelay), {
+        BackgroundTransparency = 0
+    })
+    
+    fadeIn:Play()
+    
+    wait(0.1)
+    
+    for _, child in pairs(component:GetChildren()) do
+        if child:IsA("GuiObject") then
+            local childFade = TweenService:Create(child, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+                BackgroundTransparency = child.Name == "ToggleTrack" and 0 or (child.Name:find("Shadow") and 0.15 or 0)
+            })
+            childFade:Play()
+            
+            if child:IsA("TextLabel") or child:IsA("TextButton") or child:IsA("TextBox") then
+                local textFade = TweenService:Create(child, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+                    TextTransparency = 0
+                })
+                textFade:Play()
+            end
+        end
+    end
+    
+    self.componentAnimationDelay = self.componentAnimationDelay + 0.05
+end
+
+function GUI:addLoadingButton(name, callback)
+    local buttonHeight = self.isMobile and 32 or 36
+    
+    local buttonFrame = Instance.new("Frame")
+    buttonFrame.Name = name .. "LoadingButtonFrame"
+    buttonFrame.Size = UDim2.new(1, 0, 0, buttonHeight + 10)
+    buttonFrame.BackgroundTransparency = 1
+    buttonFrame.Parent = self.contentScrolling
+    
+    local button = Instance.new("TextButton")
+    button.Name = name .. "LoadingButton"
+    button.Size = UDim2.new(1, -20, 0, buttonHeight)
+    button.Position = UDim2.new(0, 10, 0, 5)
+    button.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+    button.BorderSizePixel = 0
+    button.Text = name
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = self.isMobile and 13 or 16
+    button.Font = Enum.Font.GothamBold
+    button.Parent = buttonFrame
+    
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 12)
+    buttonCorner.Parent = button
+    
+    local loadingSpinner = Instance.new("Frame")
+    loadingSpinner.Name = "LoadingSpinner"
+    loadingSpinner.Size = UDim2.new(0, 16, 0, 16)
+    loadingSpinner.Position = UDim2.new(0, 12, 0.5, -8)
+    loadingSpinner.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    loadingSpinner.BackgroundTransparency = 1
+    loadingSpinner.BorderSizePixel = 0
+    loadingSpinner.Visible = false
+    loadingSpinner.Parent = button
+    
+    local spinnerCorner = Instance.new("UICorner")
+    spinnerCorner.CornerRadius = UDim.new(1, 0)
+    spinnerCorner.Parent = loadingSpinner
+    
+    local spinnerStroke = Instance.new("UIStroke")
+    spinnerStroke.Color = Color3.fromRGB(255, 255, 255)
+    spinnerStroke.Thickness = 2
+    spinnerStroke.Parent = loadingSpinner
+    
+    local spinnerGradient = Instance.new("UIGradient")
+    spinnerGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+    }
+    spinnerGradient.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0, 0),
+        NumberSequenceKeypoint.new(0.8, 0.7),
+        NumberSequenceKeypoint.new(1, 1)
+    }
+    spinnerGradient.Parent = loadingSpinner
+    
+    local isLoading = false
+    local originalText = name
+    
+    local function startLoading()
+        isLoading = true
+        button.Text = ""
+        loadingSpinner.Visible = true
+        
+        local spinTween = TweenService:Create(spinnerGradient, TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, math.huge), {
+            Rotation = 360
+        })
+        spinTween:Play()
+        
+        button.MouseButton1Click:Disconnect()
+    end
+    
+    local function stopLoading()
+        isLoading = false
+        button.Text = originalText
+        loadingSpinner.Visible = false
+        TweenService:Create(spinnerGradient, TweenInfo.new(0), {Rotation = 0}):Play()
+    end
+    
+    button.MouseButton1Click:Connect(function()
+        if not isLoading then
+            startLoading()
+            
+            if callback then
+                local success = callback(stopLoading)
+                if success ~= false then
+                    wait(2)
+                    stopLoading()
+                end
+            else
+                wait(2)
+                stopLoading()
+            end
+        end
+    end)
+    
+    self:animateComponentIn(buttonFrame)
+    
+    return buttonFrame, startLoading, stopLoading
+end
+
+function GUI:addDivider(text)
+    local dividerHeight = 30
+    
+    local dividerFrame = Instance.new("Frame")
+    dividerFrame.Name = "DividerFrame"
+    dividerFrame.Size = UDim2.new(1, 0, 0, dividerHeight)
+    dividerFrame.BackgroundTransparency = 1
+    dividerFrame.Parent = self.contentScrolling
+    
+    local dividerLine = Instance.new("Frame")
+    dividerLine.Name = "DividerLine"
+    dividerLine.Size = UDim2.new(1, -40, 0, 1)
+    dividerLine.Position = UDim2.new(0, 20, 0.5, 0)
+    dividerLine.BackgroundColor3 = Color3.fromRGB(60, 65, 75)
+    dividerLine.BorderSizePixel = 0
+    dividerLine.Parent = dividerFrame
+    
+    if text and text ~= "" then
+        local dividerText = Instance.new("TextLabel")
+        dividerText.Name = "DividerText"
+        dividerText.Size = UDim2.new(0, 0, 0, 20)
+        dividerText.Position = UDim2.new(0.5, 0, 0.5, -10)
+        dividerText.AnchorPoint = Vector2.new(0.5, 0)
+        dividerText.BackgroundColor3 = Color3.fromRGB(18, 20, 26)
+        dividerText.BackgroundTransparency = 0.1
+        dividerText.BorderSizePixel = 0
+        dividerText.Text = " " .. text .. " "
+        dividerText.TextColor3 = Color3.fromRGB(180, 180, 200)
+        dividerText.TextSize = self.isMobile and 11 or 13
+        dividerText.Font = Enum.Font.Gotham
+        dividerText.Parent = dividerFrame
+        
+        dividerText.Size = UDim2.new(0, dividerText.TextBounds.X + 20, 0, 20)
+    end
+    
+    self:animateComponentIn(dividerFrame)
+    
+    return dividerFrame
+end
+
+function GUI:addProgressBar(name, defaultValue, maxValue)
+    local progressHeight = self.isMobile and 35 or 40
+    local currentValue = self:getComponentState(self.currentSidebarName, name .. "_progress", defaultValue or 0)
+    maxValue = maxValue or 100
+    
+    local progressFrame = Instance.new("Frame")
+    progressFrame.Name = name .. "Progress"
+    progressFrame.Size = UDim2.new(1, 0, 0, progressHeight)
+    progressFrame.BackgroundColor3 = Color3.fromRGB(26, 29, 36)
+    progressFrame.BorderSizePixel = 0
+    progressFrame.Parent = self.contentScrolling
+    
+    local progressCorner = Instance.new("UICorner")
+    progressCorner.CornerRadius = UDim.new(0, 8)
+    progressCorner.Parent = progressFrame
+    
+    local progressLabel = Instance.new("TextLabel")
+    progressLabel.Name = "ProgressLabel"
+    progressLabel.Size = UDim2.new(1, -60, 0, 16)
+    progressLabel.Position = UDim2.new(0, self.isMobile and 12 or 16, 0, 4)
+    progressLabel.BackgroundTransparency = 1
+    progressLabel.Text = name
+    progressLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    progressLabel.TextSize = self.isMobile and 12 or 15
+    progressLabel.Font = Enum.Font.GothamBold
+    progressLabel.TextXAlignment = Enum.TextXAlignment.Left
+    progressLabel.Parent = progressFrame
+    
+    local percentLabel = Instance.new("TextLabel")
+    percentLabel.Name = "PercentLabel"
+    percentLabel.Size = UDim2.new(0, 50, 0, 16)
+    percentLabel.Position = UDim2.new(1, -64, 0, 4)
+    percentLabel.BackgroundTransparency = 1
+    percentLabel.Text = math.floor((currentValue / maxValue) * 100) .. "%"
+    percentLabel.TextColor3 = Color3.fromRGB(64, 162, 255)
+    percentLabel.TextSize = self.isMobile and 12 or 15
+    percentLabel.Font = Enum.Font.GothamBold
+    percentLabel.TextXAlignment = Enum.TextXAlignment.Right
+    percentLabel.Parent = progressFrame
+    
+    local progressTrack = Instance.new("Frame")
+    progressTrack.Name = "ProgressTrack"
+    progressTrack.Size = UDim2.new(1, -32, 0, 6)
+    progressTrack.Position = UDim2.new(0, 16, 1, -14)
+    progressTrack.BackgroundColor3 = Color3.fromRGB(38, 42, 52)
+    progressTrack.BorderSizePixel = 0
+    progressTrack.Parent = progressFrame
+    
+    local trackCorner = Instance.new("UICorner")
+    trackCorner.CornerRadius = UDim.new(0, 3)
+    trackCorner.Parent = progressTrack
+    
+    local progressBar = Instance.new("Frame")
+    progressBar.Name = "ProgressBar"
+    progressBar.Size = UDim2.new(currentValue / maxValue, 0, 1, 0)
+    progressBar.Position = UDim2.new(0, 0, 0, 0)
+    progressBar.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+    progressBar.BorderSizePixel = 0
+    progressBar.Parent = progressTrack
+    
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(0, 3)
+    barCorner.Parent = progressBar
+    
+    local barGradient = Instance.new("UIGradient")
+    barGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(84, 182, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(64, 162, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(44, 142, 235))
+    }
+    barGradient.Rotation = 45
+    barGradient.Parent = progressBar
+    
+    local function updateProgress(value)
+        value = math.clamp(value, 0, maxValue)
+        local percentage = value / maxValue
+        
+        local barTween = TweenService:Create(progressBar, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            Size = UDim2.new(percentage, 0, 1, 0)
+        })
+        
+        local textTween = TweenService:Create(percentLabel, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {
+            TextTransparency = 0.5
+        })
+        
+        barTween:Play()
+        textTween:Play()
+        
+        textTween.Completed:Connect(function()
+            percentLabel.Text = math.floor(percentage * 100) .. "%"
+            local fadeIn = TweenService:Create(percentLabel, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {
+                TextTransparency = 0
+            })
+            fadeIn:Play()
+        end)
+        
+        self:saveComponentState(self.currentSidebarName, name .. "_progress", value)
+    end
+    
+    self:animateComponentIn(progressFrame)
+    
+    return progressFrame, updateProgress
+end
 end
 
 function GUI:createTitleBar(title)
@@ -363,6 +649,7 @@ function GUI:clearContent()
             child:Destroy()
         end
     end
+    self.componentAnimationDelay = 0
 end
 
 function GUI:addToggle(name, defaultValue, callback)
@@ -469,6 +756,8 @@ function GUI:addToggle(name, defaultValue, callback)
         end
     end)
     
+    self:animateComponentIn(toggleFrame)
+    
     return toggleFrame
 end
 
@@ -543,6 +832,8 @@ function GUI:addDropdown(name, options, defaultOption, callback, multiSelect)
     dropdownButton.MouseButton1Click:Connect(function()
         self:createDropdownDialog(name, options, currentValue, callback, dropdownButton, multiSelect)
     end)
+    
+    self:animateComponentIn(dropdownFrame)
     
     return dropdownFrame
 end
@@ -1124,6 +1415,8 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
         end
     end)
     
+    self:animateComponentIn(sliderFrame)
+    
     return sliderFrame
 end
 
@@ -1140,7 +1433,7 @@ function GUI:addButton(name, callback)
     button.Name = name .. "Button"
     button.Size = UDim2.new(1, -20, 0, buttonHeight)
     button.Position = UDim2.new(0, 10, 0, 5)
-    button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    button.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
     button.BorderSizePixel = 0
     button.Text = name
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -1149,129 +1442,127 @@ function GUI:addButton(name, callback)
     button.Parent = buttonFrame
     
     local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 10)
+    buttonCorner.CornerRadius = UDim.new(0, 12)
     buttonCorner.Parent = button
-    
-    local buttonGradient = Instance.new("UIGradient")
-    buttonGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(88, 86, 214)),
-        ColorSequenceKeypoint.new(0.3, Color3.fromRGB(58, 134, 255)),
-        ColorSequenceKeypoint.new(0.7, Color3.fromRGB(0, 123, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 101, 235))
-    }
-    buttonGradient.Rotation = 135
-    buttonGradient.Parent = button
     
     local buttonGlow = Instance.new("Frame")
     buttonGlow.Name = "ButtonGlow"
-    buttonGlow.Size = UDim2.new(1, 8, 1, 8)
-    buttonGlow.Position = UDim2.new(0, -4, 0, -4)
-    buttonGlow.BackgroundColor3 = Color3.fromRGB(58, 134, 255)
+    buttonGlow.Size = UDim2.new(1, 10, 1, 10)
+    buttonGlow.Position = UDim2.new(0, -5, 0, -5)
+    buttonGlow.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
     buttonGlow.BackgroundTransparency = 1
     buttonGlow.BorderSizePixel = 0
     buttonGlow.ZIndex = 0
     buttonGlow.Parent = button
     
     local glowCorner = Instance.new("UICorner")
-    glowCorner.CornerRadius = UDim.new(0, 14)
+    glowCorner.CornerRadius = UDim.new(0, 17)
     glowCorner.Parent = buttonGlow
     
     local buttonShadow = Instance.new("Frame")
     buttonShadow.Name = "ButtonShadow"
     buttonShadow.Size = UDim2.new(1, 8, 1, 8)
-    buttonShadow.Position = UDim2.new(0, -4, 0, 2)
+    buttonShadow.Position = UDim2.new(0, -4, 0, 3)
     buttonShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    buttonShadow.BackgroundTransparency = 0.25
+    buttonShadow.BackgroundTransparency = 0.2
     buttonShadow.ZIndex = -1
     buttonShadow.Parent = button
     
     local shadowCorner = Instance.new("UICorner")
-    shadowCorner.CornerRadius = UDim.new(0, 14)
+    shadowCorner.CornerRadius = UDim.new(0, 16)
     shadowCorner.Parent = buttonShadow
     
     local shadowGradient = Instance.new("UIGradient")
-    shadowGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 40))
+    shadowGradient.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0, 0.2),
+        NumberSequenceKeypoint.new(1, 0.8)
     }
     shadowGradient.Rotation = 90
     shadowGradient.Parent = buttonShadow
     
     local highlightLayer = Instance.new("Frame")
     highlightLayer.Name = "HighlightLayer"
-    highlightLayer.Size = UDim2.new(1, 0, 0.6, 0)
+    highlightLayer.Size = UDim2.new(1, 0, 0.5, 0)
     highlightLayer.Position = UDim2.new(0, 0, 0, 0)
     highlightLayer.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    highlightLayer.BackgroundTransparency = 0.7
+    highlightLayer.BackgroundTransparency = 0.8
     highlightLayer.BorderSizePixel = 0
     highlightLayer.ZIndex = 1
     highlightLayer.Parent = button
     
     local highlightCorner = Instance.new("UICorner")
-    highlightCorner.CornerRadius = UDim.new(0, 10)
+    highlightCorner.CornerRadius = UDim.new(0, 12)
     highlightCorner.Parent = highlightLayer
     
     local highlightGradient = Instance.new("UIGradient")
-    highlightGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-    }
     highlightGradient.Transparency = NumberSequence.new{
-        NumberSequenceKeypoint.new(0, 0.3),
-        NumberSequenceKeypoint.new(0.7, 0.8),
+        NumberSequenceKeypoint.new(0, 0.8),
+        NumberSequenceKeypoint.new(0.7, 0.9),
         NumberSequenceKeypoint.new(1, 1)
     }
     highlightGradient.Rotation = 90
     highlightGradient.Parent = highlightLayer
     
+    local pulseFrame = Instance.new("Frame")
+    pulseFrame.Name = "PulseFrame"
+    pulseFrame.Size = UDim2.new(1, 0, 1, 0)
+    pulseFrame.Position = UDim2.new(0, 0, 0, 0)
+    pulseFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    pulseFrame.BackgroundTransparency = 1
+    pulseFrame.BorderSizePixel = 0
+    pulseFrame.ZIndex = 2
+    pulseFrame.Parent = button
+    
+    local pulseCorner = Instance.new("UICorner")
+    pulseCorner.CornerRadius = UDim.new(0, 12)
+    pulseCorner.Parent = pulseFrame
+    
     button.MouseEnter:Connect(function()
-        local hoverTween = TweenService:Create(buttonGradient, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-            Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(108, 106, 234)),
-                ColorSequenceKeypoint.new(0.3, Color3.fromRGB(78, 154, 255)),
-                ColorSequenceKeypoint.new(0.7, Color3.fromRGB(20, 143, 255)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 121, 245))
-            }
+        local hoverTween = TweenService:Create(button, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+            BackgroundColor3 = Color3.fromRGB(84, 182, 255)
         })
-        local glowTween = TweenService:Create(buttonGlow, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-            BackgroundTransparency = 0.5
+        local glowTween = TweenService:Create(buttonGlow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+            BackgroundTransparency = 0.6
         })
-        local shadowTween = TweenService:Create(buttonShadow, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+        local shadowTween = TweenService:Create(buttonShadow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
             BackgroundTransparency = 0.1,
-            Position = UDim2.new(0, -4, 0, 4)
+            Position = UDim2.new(0, -4, 0, 5)
         })
-        local scaleTween = TweenService:Create(button, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-            Size = UDim2.new(1, -16, 0, buttonHeight + 3)
+        local scaleTween = TweenService:Create(button, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+            Size = UDim2.new(1, -16, 0, buttonHeight + 4)
+        })
+        local pulseTween = TweenService:Create(pulseFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            BackgroundTransparency = 0.9
         })
         hoverTween:Play()
         glowTween:Play()
         shadowTween:Play()
         scaleTween:Play()
+        pulseTween:Play()
     end)
     
     button.MouseLeave:Connect(function()
-        local hoverTween = TweenService:Create(buttonGradient, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-            Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(88, 86, 214)),
-                ColorSequenceKeypoint.new(0.3, Color3.fromRGB(58, 134, 255)),
-                ColorSequenceKeypoint.new(0.7, Color3.fromRGB(0, 123, 255)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 101, 235))
-            }
+        local hoverTween = TweenService:Create(button, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+            BackgroundColor3 = Color3.fromRGB(64, 162, 255)
         })
-        local glowTween = TweenService:Create(buttonGlow, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+        local glowTween = TweenService:Create(buttonGlow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
             BackgroundTransparency = 1
         })
-        local shadowTween = TweenService:Create(buttonShadow, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-            BackgroundTransparency = 0.25,
-            Position = UDim2.new(0, -4, 0, 2)
+        local shadowTween = TweenService:Create(buttonShadow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+            BackgroundTransparency = 0.2,
+            Position = UDim2.new(0, -4, 0, 3)
         })
-        local scaleTween = TweenService:Create(button, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+        local scaleTween = TweenService:Create(button, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
             Size = UDim2.new(1, -20, 0, buttonHeight)
+        })
+        local pulseTween = TweenService:Create(pulseFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            BackgroundTransparency = 1
         })
         hoverTween:Play()
         glowTween:Play()
         shadowTween:Play()
         scaleTween:Play()
+        pulseTween:Play()
     end)
     
     button.MouseButton1Click:Connect(function()
@@ -1323,6 +1614,8 @@ function GUI:addButton(name, callback)
             callback()
         end
     end)
+    
+    self:animateComponentIn(buttonFrame)
     
     return buttonFrame
 end
@@ -1546,6 +1839,8 @@ function GUI:addTextInput(name, placeholder, callback)
         end
     end)
     
+    self:animateComponentIn(inputFrame)
+    
     return inputFrame
 end
 
@@ -1625,7 +1920,7 @@ function GUI:createDialog(title, content, buttons)
         local dialogButton = Instance.new("TextButton")
         dialogButton.Name = "DialogButton" .. i
         dialogButton.Size = UDim2.new(0, self.isMobile and 50 or 60, 1, 0)
-        dialogButton.BackgroundColor3 = i == 1 and Color3.fromRGB(58, 134, 255) or Color3.fromRGB(48, 52, 62)
+        dialogButton.BackgroundColor3 = i == 1 and Color3.fromRGB(64, 162, 255) or Color3.fromRGB(48, 52, 62)
         dialogButton.BorderSizePixel = 0
         dialogButton.Text = buttonName
         dialogButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -1645,13 +1940,13 @@ function GUI:createDialog(title, content, buttons)
         end)
         
         dialogButton.MouseEnter:Connect(function()
-            local hoverColor = i == 1 and Color3.fromRGB(78, 154, 255) or Color3.fromRGB(68, 72, 82)
+            local hoverColor = i == 1 and Color3.fromRGB(84, 182, 255) or Color3.fromRGB(68, 72, 82)
             local tween = TweenService:Create(dialogButton, TweenInfo.new(0.15), {BackgroundColor3 = hoverColor})
             tween:Play()
         end)
         
         dialogButton.MouseLeave:Connect(function()
-            local normalColor = i == 1 and Color3.fromRGB(58, 134, 255) or Color3.fromRGB(48, 52, 62)
+            local normalColor = i == 1 and Color3.fromRGB(64, 162, 255) or Color3.fromRGB(48, 52, 62)
             local tween = TweenService:Create(dialogButton, TweenInfo.new(0.15), {BackgroundColor3 = normalColor})
             tween:Play()
         end)
