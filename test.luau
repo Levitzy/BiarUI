@@ -1140,7 +1140,7 @@ function GUI:addButton(name, callback)
     button.Name = name .. "Button"
     button.Size = UDim2.new(1, -20, 0, buttonHeight)
     button.Position = UDim2.new(0, 10, 0, 5)
-    button.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
+    button.BackgroundColor3 = Color3.fromRGB(37, 99, 235)
     button.BorderSizePixel = 0
     button.Text = name
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
