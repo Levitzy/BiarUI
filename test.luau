@@ -244,7 +244,7 @@ function GUI:addSidebarItem(name, callback)
     item.Parent = self.sidebarScrolling
     
     local itemCorner = Instance.new("UICorner")
-    itemCorner.CornerRadius = UDim.new(0, 6)
+    itemCorner.CornerRadius = UDim.new(0, 10)
     itemCorner.Parent = item
     
     local itemButton = Instance.new("TextButton")
@@ -925,10 +925,12 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
     fillGradient.Rotation = 90
     fillGradient.Parent = sliderFill
     
+    local knobSize = self.isMobile and 16 or 18
+    
     local sliderKnob = Instance.new("Frame")
     sliderKnob.Name = "SliderKnob"
-    sliderKnob.Size = UDim2.new(0, self.isMobile and 20 or 24, 0, self.isMobile and 20 or 24)
-    sliderKnob.Position = UDim2.new((defaultValue - minValue) / (maxValue - minValue), self.isMobile and -10 or -12, 0.5, self.isMobile and -10 or -12)
+    sliderKnob.Size = UDim2.new(0, knobSize, 0, knobSize)
+    sliderKnob.Position = UDim2.new((defaultValue - minValue) / (maxValue - minValue), -knobSize/2, 0.5, -knobSize/2)
     sliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     sliderKnob.BorderSizePixel = 0
     sliderKnob.ZIndex = 4
@@ -949,8 +951,8 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
     
     local knobShadow = Instance.new("Frame")
     knobShadow.Name = "KnobShadow"
-    knobShadow.Size = UDim2.new(1, 8, 1, 8)
-    knobShadow.Position = UDim2.new(0, -4, 0, -4)
+    knobShadow.Size = UDim2.new(1, 6, 1, 6)
+    knobShadow.Position = UDim2.new(0, -3, 0, -3)
     knobShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     knobShadow.BackgroundTransparency = 0.15
     knobShadow.ZIndex = 3
@@ -977,8 +979,8 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
     
     local knobInner = Instance.new("Frame")
     knobInner.Name = "KnobInner"
-    knobInner.Size = UDim2.new(0, 6, 0, 6)
-    knobInner.Position = UDim2.new(0.5, -3, 0.5, -3)
+    knobInner.Size = UDim2.new(0, 5, 0, 5)
+    knobInner.Position = UDim2.new(0.5, -2.5, 0.5, -2.5)
     knobInner.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
     knobInner.BorderSizePixel = 0
     knobInner.ZIndex = 5
@@ -998,7 +1000,7 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
         valueLabel.Text = tostring(currentValue)
         
         local fillTween = TweenService:Create(sliderFill, TweenInfo.new(0.1, Enum.EasingStyle.Quart), {Size = UDim2.new(relativePos, 0, 1, 0)})
-        local knobTween = TweenService:Create(sliderKnob, TweenInfo.new(0.1, Enum.EasingStyle.Quart), {Position = UDim2.new(relativePos, self.isMobile and -10 or -12, 0.5, self.isMobile and -10 or -12)})
+        local knobTween = TweenService:Create(sliderKnob, TweenInfo.new(0.1, Enum.EasingStyle.Quart), {Position = UDim2.new(relativePos, -knobSize/2, 0.5, -knobSize/2)})
         
         fillTween:Play()
         knobTween:Play()
@@ -1011,17 +1013,17 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
     local function startDragging()
         dragging = true
         local expandTween = TweenService:Create(knobHighlight, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {
-            Size = UDim2.new(0, 36, 0, 36)
+            Size = UDim2.new(0, 30, 0, 30)
         })
         local scaleTween = TweenService:Create(sliderKnob, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {
-            Size = UDim2.new(0, self.isMobile and 24 or 28, 0, self.isMobile and 24 or 28)
+            Size = UDim2.new(0, knobSize + 4, 0, knobSize + 4)
         })
         local glowTween = TweenService:Create(sliderGlow, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {
             BackgroundTransparency = 0.7
         })
         local innerTween = TweenService:Create(knobInner, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {
-            Size = UDim2.new(0, 8, 0, 8),
-            Position = UDim2.new(0.5, -4, 0.5, -4)
+            Size = UDim2.new(0, 6, 0, 6),
+            Position = UDim2.new(0.5, -3, 0.5, -3)
         })
         expandTween:Play()
         scaleTween:Play()
@@ -1035,14 +1037,14 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
             Size = UDim2.new(0, 0, 0, 0)
         })
         local scaleTween = TweenService:Create(sliderKnob, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-            Size = UDim2.new(0, self.isMobile and 20 or 24, 0, self.isMobile and 20 or 24)
+            Size = UDim2.new(0, knobSize, 0, knobSize)
         })
         local glowTween = TweenService:Create(sliderGlow, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
             BackgroundTransparency = 1
         })
         local innerTween = TweenService:Create(knobInner, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-            Size = UDim2.new(0, 6, 0, 6),
-            Position = UDim2.new(0.5, -3, 0.5, -3)
+            Size = UDim2.new(0, 5, 0, 5),
+            Position = UDim2.new(0.5, -2.5, 0.5, -2.5)
         })
         contractTween:Play()
         scaleTween:Play()
@@ -1349,7 +1351,7 @@ function GUI:addTextInput(name, placeholder, callback)
     labelBackground.Size = UDim2.new(0, 0, 0, 6)
     labelBackground.Position = UDim2.new(0, 10, 0, -3)
     labelBackground.BackgroundColor3 = Color3.fromRGB(26, 29, 36)
-    labelBackground.BackgroundTransparency = 0.1
+    labelBackground.BackgroundTransparency = 0.95
     labelBackground.BorderSizePixel = 0
     labelBackground.Visible = false
     labelBackground.ZIndex = 2
