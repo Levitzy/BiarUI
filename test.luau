@@ -1144,8 +1144,10 @@ function GUI:addButton(name, callback)
     button.BorderSizePixel = 0
     button.Text = name
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextStrokeTransparency = 1
     button.TextSize = self.isMobile and 13 or 16
     button.Font = Enum.Font.SourceSansSemibold
+    button.ZIndex = 2
     button.Parent = buttonFrame
     
     local buttonCorner = Instance.new("UICorner")
