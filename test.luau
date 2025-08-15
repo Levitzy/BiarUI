@@ -1140,12 +1140,12 @@ function GUI:addButton(name, callback)
     button.Name = name .. "Button"
     button.Size = UDim2.new(1, -20, 0, buttonHeight)
     button.Position = UDim2.new(0, 10, 0, 5)
-    button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    button.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
     button.BorderSizePixel = 0
     button.Text = name
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.TextSize = self.isMobile and 13 or 16
-    button.Font = Enum.Font.GothamBold
+    button.Font = Enum.Font.SourceSansSemibold
     button.Parent = buttonFrame
     
     local buttonCorner = Instance.new("UICorner")
