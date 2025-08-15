@@ -66,7 +66,6 @@ function GUI.new(title)
     
     self.componentStates = {}
     self.componentCallbacks = {}
-    self.componentAnimationDelay = 0
     
     self:makeDraggable()
     
@@ -259,57 +258,6 @@ function GUI:saveComponentCallback(sidebarName, componentId, callback)
     self.componentCallbacks[sidebarName][componentId] = callback
 end
 
-function GUI:animateComponentIn(component)
-    if not component then return end
-    
-    component.BackgroundTransparency = 1
-    for _, child in pairs(component:GetChildren()) do
-        if child:IsA("GuiObject") then
-            child.BackgroundTransparency = 1
-            if child:IsA("TextLabel") or child:IsA("TextButton") or child:IsA("TextBox") then
-                child.TextTransparency = 1
-            end
-        end
-    end
-    
-    local fadeIn = TweenService:Create(component, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out, 0, false, self.componentAnimationDelay), {
-        BackgroundTransparency = 0
-    })
-    
-    fadeIn:Play()
-    
-    spawn(function()
-        wait(0.1)
-        
-        for _, child in pairs(component:GetChildren()) do
-            if child:IsA("GuiObject") then
-                local targetTransparency = 0
-                if child.Name:find("Shadow") then
-                    targetTransparency = 0.15
-                elseif child.Name == "ToggleTrack" then
-                    targetTransparency = 0
-                else
-                    targetTransparency = 0
-                end
-                
-                local childFade = TweenService:Create(child, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-                    BackgroundTransparency = targetTransparency
-                })
-                childFade:Play()
-                
-                if child:IsA("TextLabel") or child:IsA("TextButton") or child:IsA("TextBox") then
-                    local textFade = TweenService:Create(child, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-                        TextTransparency = 0
-                    })
-                    textFade:Play()
-                end
-            end
-        end
-    end)
-    
-    self.componentAnimationDelay = self.componentAnimationDelay + 0.05
-end
-
 function GUI:addSidebarItem(name, callback)
     local itemHeight = self.isMobile and 28 or 32
     
@@ -345,7 +293,7 @@ function GUI:addSidebarItem(name, callback)
     highlight.Name = "Highlight"
     highlight.Size = UDim2.new(0, 3, 0.7, 0)
     highlight.Position = UDim2.new(0, 0, 0.15, 0)
-    highlight.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+    highlight.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
     highlight.BorderSizePixel = 0
     highlight.Visible = false
     highlight.Parent = item
@@ -415,7 +363,6 @@ function GUI:clearContent()
             child:Destroy()
         end
     end
-    self.componentAnimationDelay = 0
 end
 
 function GUI:addToggle(name, defaultValue, callback)
@@ -455,7 +402,7 @@ function GUI:addToggle(name, defaultValue, callback)
     toggleTrack.Name = "ToggleTrack"
     toggleTrack.Size = UDim2.new(0, switchSize[1], 0, switchSize[2])
     toggleTrack.Position = UDim2.new(1, -switchSize[1] - (self.isMobile and 12 or 16), 0.5, -switchSize[2]/2)
-    toggleTrack.BackgroundColor3 = currentValue and Color3.fromRGB(64, 162, 255) or Color3.fromRGB(72, 72, 74)
+    toggleTrack.BackgroundColor3 = currentValue and Color3.fromRGB(0, 122, 255) or Color3.fromRGB(72, 72, 74)
     toggleTrack.BorderSizePixel = 0
     toggleTrack.Parent = toggleFrame
     
@@ -501,7 +448,7 @@ function GUI:addToggle(name, defaultValue, callback)
     local isToggled = currentValue
     
     local function animateToggle()
-        local trackColor = isToggled and Color3.fromRGB(64, 162, 255) or Color3.fromRGB(72, 72, 74)
+        local trackColor = isToggled and Color3.fromRGB(0, 122, 255) or Color3.fromRGB(72, 72, 74)
         local knobPosition = isToggled and UDim2.new(1, -knobSize - 2, 0.5, -knobSize/2) or UDim2.new(0, 2, 0.5, -knobSize/2)
         
         local trackTween = TweenService:Create(toggleTrack, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {BackgroundColor3 = trackColor})
@@ -522,9 +469,411 @@ function GUI:addToggle(name, defaultValue, callback)
         end
     end)
     
-    self:animateComponentIn(toggleFrame)
-    
     return toggleFrame
+end
+
+function GUI:addDropdown(name, options, defaultOption, callback, multiSelect)
+    multiSelect = multiSelect or false
+    local dropdownHeight = self.isMobile and 32 or 36
+    local componentId = name .. "_dropdown"
+    local currentValue = self:getComponentState(self.currentSidebarName, componentId, defaultOption or options[1] or "")
+    
+    self:saveComponentCallback(self.currentSidebarName, componentId, callback)
+    
+    local dropdownFrame = Instance.new("Frame")
+    dropdownFrame.Name = name .. "Dropdown"
+    dropdownFrame.Size = UDim2.new(1, 0, 0, dropdownHeight)
+    dropdownFrame.BackgroundColor3 = Color3.fromRGB(26, 29, 36)
+    dropdownFrame.BorderSizePixel = 0
+    dropdownFrame.Parent = self.contentScrolling
+    
+    local dropdownCorner = Instance.new("UICorner")
+    dropdownCorner.CornerRadius = UDim.new(0, 8)
+    dropdownCorner.Parent = dropdownFrame
+    
+    local dropdownLabel = Instance.new("TextLabel")
+    dropdownLabel.Name = "DropdownLabel"
+    dropdownLabel.Size = UDim2.new(0.5, 0, 1, 0)
+    dropdownLabel.Position = UDim2.new(0, self.isMobile and 12 or 16, 0, 0)
+    dropdownLabel.BackgroundTransparency = 1
+    dropdownLabel.Text = name
+    dropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    dropdownLabel.TextSize = self.isMobile and 12 or 15
+    dropdownLabel.Font = Enum.Font.Gotham
+    dropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
+    dropdownLabel.Parent = dropdownFrame
+    
+    local buttonWidth = self.isMobile and 90 or 110
+    local buttonHeight = self.isMobile and 20 or 24
+    
+    local dropdownButton = Instance.new("TextButton")
+    dropdownButton.Name = "DropdownButton"
+    dropdownButton.Size = UDim2.new(0, buttonWidth, 0, buttonHeight)
+    dropdownButton.Position = UDim2.new(1, -buttonWidth - (self.isMobile and 12 or 16), 0.5, -buttonHeight/2)
+    dropdownButton.BackgroundColor3 = Color3.fromRGB(44, 47, 58)
+    dropdownButton.BorderSizePixel = 0
+    dropdownButton.Text = currentValue
+    dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    dropdownButton.TextSize = self.isMobile and 10 or 13
+    dropdownButton.Font = Enum.Font.Gotham
+    dropdownButton.Parent = dropdownFrame
+    
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.Parent = dropdownButton
+    
+    local arrow = Instance.new("TextLabel")
+    arrow.Name = "Arrow"
+    arrow.Size = UDim2.new(0, 12, 0, 12)
+    arrow.Position = UDim2.new(1, -16, 0.5, -6)
+    arrow.BackgroundTransparency = 1
+    arrow.Text = "▼"
+    arrow.TextColor3 = Color3.fromRGB(180, 180, 200)
+    arrow.TextSize = self.isMobile and 8 or 10
+    arrow.Font = Enum.Font.Gotham
+    arrow.Parent = dropdownButton
+    
+    if multiSelect then
+        self.multiSelectDropdowns[name] = self:getComponentState(self.currentSidebarName, componentId, {})
+        self.dropdownSelections[name] = {}
+    else
+        self.dropdownSelections[name] = currentValue
+    end
+    
+    dropdownButton.MouseButton1Click:Connect(function()
+        self:createDropdownDialog(name, options, currentValue, callback, dropdownButton, multiSelect)
+    end)
+    
+    return dropdownFrame
+end
+
+function GUI:createDropdownDialog(title, options, defaultOption, callback, button, multiSelect)
+    multiSelect = multiSelect or false
+    local dialogSize = self.isMobile and {260, 220} or {300, 260}
+    
+    local overlay = Instance.new("Frame")
+    overlay.Name = "DropdownOverlay"
+    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.Position = UDim2.new(0, 0, 0, 0)
+    overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    overlay.BackgroundTransparency = 0.4
+    overlay.BorderSizePixel = 0
+    overlay.ZIndex = 25
+    overlay.Parent = self.screenGui
+    
+    local dialog = Instance.new("Frame")
+    dialog.Name = "DropdownDialog"
+    dialog.Size = UDim2.new(0, dialogSize[1], 0, dialogSize[2])
+    dialog.Position = UDim2.new(0.5, -dialogSize[1]/2, 0.5, -dialogSize[2]/2)
+    dialog.BackgroundColor3 = Color3.fromRGB(22, 25, 32)
+    dialog.BorderSizePixel = 0
+    dialog.ZIndex = 30
+    dialog.Parent = overlay
+    
+    local dialogCorner = Instance.new("UICorner")
+    dialogCorner.CornerRadius = UDim.new(0, 12)
+    dialogCorner.Parent = dialog
+    
+    local dialogTitle = Instance.new("TextLabel")
+    dialogTitle.Name = "DialogTitle"
+    dialogTitle.Size = UDim2.new(1, -40, 0, 30)
+    dialogTitle.Position = UDim2.new(0, 12, 0, 8)
+    dialogTitle.BackgroundTransparency = 1
+    dialogTitle.Text = "Select " .. title .. (multiSelect and " (Multiple)" or "")
+    dialogTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    dialogTitle.TextSize = self.isMobile and 14 or 18
+    dialogTitle.Font = Enum.Font.GothamBold
+    dialogTitle.TextXAlignment = Enum.TextXAlignment.Left
+    dialogTitle.Parent = dialog
+    
+    local closeButton = Instance.new("TextButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Size = UDim2.new(0, 20, 0, 20)
+    closeButton.Position = UDim2.new(1, -28, 0, 8)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 59, 48)
+    closeButton.BorderSizePixel = 0
+    closeButton.Text = "×"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.TextSize = self.isMobile and 10 or 12
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.Parent = dialog
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 10)
+    closeCorner.Parent = closeButton
+    
+    local searchFrame = Instance.new("Frame")
+    searchFrame.Name = "SearchFrame"
+    searchFrame.Size = UDim2.new(1, -24, 0, self.isMobile and 24 or 28)
+    searchFrame.Position = UDim2.new(0, 12, 0, 40)
+    searchFrame.BackgroundColor3 = Color3.fromRGB(32, 36, 44)
+    searchFrame.BorderSizePixel = 0
+    searchFrame.Parent = dialog
+    
+    local searchCorner = Instance.new("UICorner")
+    searchCorner.CornerRadius = UDim.new(0, 6)
+    searchCorner.Parent = searchFrame
+    
+    local searchBox = Instance.new("TextBox")
+    searchBox.Name = "SearchBox"
+    searchBox.Size = UDim2.new(1, -24, 1, 0)
+    searchBox.Position = UDim2.new(0, 8, 0, 0)
+    searchBox.BackgroundTransparency = 1
+    searchBox.Text = ""
+    searchBox.PlaceholderText = "Search options..."
+    searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    searchBox.PlaceholderColor3 = Color3.fromRGB(140, 140, 160)
+    searchBox.TextSize = self.isMobile and 10 or 12
+    searchBox.Font = Enum.Font.Gotham
+    searchBox.TextXAlignment = Enum.TextXAlignment.Left
+    searchBox.Parent = searchFrame
+    
+    local searchIcon = Instance.new("TextLabel")
+    searchIcon.Name = "SearchIcon"
+    searchIcon.Size = UDim2.new(0, 12, 0, 12)
+    searchIcon.Position = UDim2.new(1, -18, 0.5, -6)
+    searchIcon.BackgroundTransparency = 1
+    searchIcon.Text = "🔍"
+    searchIcon.TextColor3 = Color3.fromRGB(140, 140, 160)
+    searchIcon.TextSize = self.isMobile and 8 or 10
+    searchIcon.Parent = searchFrame
+    
+    local scrollFrame = Instance.new("ScrollingFrame")
+    scrollFrame.Name = "OptionsScroll"
+    scrollFrame.Size = UDim2.new(1, -24, 1, multiSelect and -110 or -80)
+    scrollFrame.Position = UDim2.new(0, 12, 0, 72)
+    scrollFrame.BackgroundTransparency = 1
+    scrollFrame.BorderSizePixel = 0
+    scrollFrame.ScrollBarThickness = 3
+    scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(120, 120, 140)
+    scrollFrame.Parent = dialog
+    
+    local optionLayout = Instance.new("UIListLayout")
+    optionLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    optionLayout.Padding = UDim.new(0, 3)
+    optionLayout.Parent = scrollFrame
+    
+    local optionPadding = Instance.new("UIPadding")
+    optionPadding.PaddingTop = UDim.new(0, 4)
+    optionPadding.PaddingBottom = UDim.new(0, 4)
+    optionPadding.Parent = scrollFrame
+    
+    local optionFrames = {}
+    local currentSelections = multiSelect and (self.multiSelectDropdowns[title] or {}) or {self.dropdownSelections[title]}
+    
+    for i, option in ipairs(options) do
+        local optionFrame = Instance.new("Frame")
+        optionFrame.Name = "Option" .. i
+        optionFrame.Size = UDim2.new(1, 0, 0, self.isMobile and 26 or 30)
+        optionFrame.BackgroundColor3 = Color3.fromRGB(32, 36, 44)
+        optionFrame.BorderSizePixel = 0
+        optionFrame.Parent = scrollFrame
+        
+        local optionCorner = Instance.new("UICorner")
+        optionCorner.CornerRadius = UDim.new(0, 6)
+        optionCorner.Parent = optionFrame
+        
+        local isSelected = false
+        for _, selection in ipairs(currentSelections) do
+            if selection == option then
+                isSelected = true
+                break
+            end
+        end
+        
+        local bottomBorder = Instance.new("Frame")
+        bottomBorder.Name = "BottomBorder"
+        bottomBorder.Size = UDim2.new(1, 0, 0, 2)
+        bottomBorder.Position = UDim2.new(0, 0, 1, -2)
+        bottomBorder.BackgroundColor3 = Color3.fromRGB(52, 199, 89)
+        bottomBorder.BorderSizePixel = 0
+        bottomBorder.Visible = isSelected
+        bottomBorder.Parent = optionFrame
+        
+        local highlightGlow = Instance.new("Frame")
+        highlightGlow.Name = "HighlightGlow"
+        highlightGlow.Size = UDim2.new(1, 0, 1, 0)
+        highlightGlow.Position = UDim2.new(0, 0, 0, 0)
+        highlightGlow.BackgroundColor3 = Color3.fromRGB(52, 199, 89)
+        highlightGlow.BackgroundTransparency = isSelected and 0.85 or 1
+        highlightGlow.BorderSizePixel = 0
+        highlightGlow.ZIndex = 0
+        highlightGlow.Parent = optionFrame
+        
+        local glowCorner = Instance.new("UICorner")
+        glowCorner.CornerRadius = UDim.new(0, 6)
+        glowCorner.Parent = highlightGlow
+        
+        local checkIcon = Instance.new("TextLabel")
+        checkIcon.Name = "CheckIcon"
+        checkIcon.Size = UDim2.new(0, 18, 0, 18)
+        checkIcon.Position = UDim2.new(1, -24, 0.5, -9)
+        checkIcon.BackgroundTransparency = 1
+        checkIcon.Text = "✓"
+        checkIcon.TextColor3 = Color3.fromRGB(52, 199, 89)
+        checkIcon.TextSize = self.isMobile and 12 or 14
+        checkIcon.Font = Enum.Font.GothamBold
+        checkIcon.Visible = isSelected
+        checkIcon.ZIndex = 2
+        checkIcon.Parent = optionFrame
+        
+        local optionButton = Instance.new("TextButton")
+        optionButton.Name = "OptionButton"
+        optionButton.Size = UDim2.new(1, 0, 1, 0)
+        optionButton.BackgroundTransparency = 1
+        optionButton.Text = option
+        optionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        optionButton.TextSize = self.isMobile and 10 or 12
+        optionButton.Font = Enum.Font.Gotham
+        optionButton.TextXAlignment = Enum.TextXAlignment.Center
+        optionButton.Parent = optionFrame
+        
+        local optionPadding = Instance.new("UIPadding")
+        optionPadding.PaddingLeft = UDim.new(0, 8)
+        optionPadding.PaddingRight = UDim.new(0, 8)
+        optionPadding.Parent = optionButton
+        
+        optionFrames[option] = {frame = optionFrame, border = bottomBorder, glow = highlightGlow, check = checkIcon, selected = isSelected}
+        
+        optionButton.MouseEnter:Connect(function()
+            if not optionFrames[option].selected then
+                local hoverTween = TweenService:Create(optionFrame, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(42, 46, 54)})
+                local glowTween = TweenService:Create(highlightGlow, TweenInfo.new(0.15), {BackgroundTransparency = 0.92})
+                hoverTween:Play()
+                glowTween:Play()
+            end
+        end)
+        
+        optionButton.MouseLeave:Connect(function()
+            if not optionFrames[option].selected then
+                local hoverTween = TweenService:Create(optionFrame, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(32, 36, 44)})
+                local glowTween = TweenService:Create(highlightGlow, TweenInfo.new(0.15), {BackgroundTransparency = 1})
+                hoverTween:Play()
+                glowTween:Play()
+            end
+        end)
+        
+        optionButton.MouseButton1Click:Connect(function()
+            if multiSelect then
+                optionFrames[option].selected = not optionFrames[option].selected
+                bottomBorder.Visible = optionFrames[option].selected
+                checkIcon.Visible = optionFrames[option].selected
+                
+                local glowTween = TweenService:Create(highlightGlow, TweenInfo.new(0.2), {
+                    BackgroundTransparency = optionFrames[option].selected and 0.85 or 1
+                })
+                glowTween:Play()
+                
+                if optionFrames[option].selected then
+                    local borderTween = TweenService:Create(bottomBorder, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+                        Size = UDim2.new(1, 0, 0, 3)
+                    })
+                    borderTween:Play()
+                end
+            else
+                for _, data in pairs(optionFrames) do
+                    data.border.Visible = false
+                    data.check.Visible = false
+                    data.selected = false
+                    local glowTween = TweenService:Create(data.glow, TweenInfo.new(0.2), {BackgroundTransparency = 1})
+                    glowTween:Play()
+                end
+                
+                optionFrames[option].selected = true
+                bottomBorder.Visible = true
+                checkIcon.Visible = true
+                local selectGlowTween = TweenService:Create(highlightGlow, TweenInfo.new(0.2), {BackgroundTransparency = 0.85})
+                local borderTween = TweenService:Create(bottomBorder, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+                    Size = UDim2.new(1, 0, 0, 3)
+                })
+                selectGlowTween:Play()
+                borderTween:Play()
+                
+                local componentId = title .. "_dropdown"
+                self:saveComponentState(self.currentSidebarName, componentId, option)
+                self.dropdownSelections[title] = option
+                button.Text = option
+                
+                wait(0.1)
+                overlay:Destroy()
+                
+                if callback then
+                    callback(option, i)
+                end
+            end
+        end)
+    end
+    
+    if multiSelect then
+        local confirmButton = Instance.new("TextButton")
+        confirmButton.Name = "ConfirmButton"
+        confirmButton.Size = UDim2.new(0, 80, 0, 24)
+        confirmButton.Position = UDim2.new(1, -92, 1, -32)
+        confirmButton.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
+        confirmButton.BorderSizePixel = 0
+        confirmButton.Text = "Done"
+        confirmButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        confirmButton.TextSize = self.isMobile and 10 or 12
+        confirmButton.Font = Enum.Font.GothamBold
+        confirmButton.Parent = dialog
+        
+        local confirmCorner = Instance.new("UICorner")
+        confirmCorner.CornerRadius = UDim.new(0, 6)
+        confirmCorner.Parent = confirmButton
+        
+        confirmButton.MouseButton1Click:Connect(function()
+            local selectedOptions = {}
+            for option, data in pairs(optionFrames) do
+                if data.selected then
+                    table.insert(selectedOptions, option)
+                end
+            end
+            
+            local componentId = title .. "_dropdown"
+            self:saveComponentState(self.currentSidebarName, componentId, selectedOptions)
+            self.multiSelectDropdowns[title] = selectedOptions
+            button.Text = #selectedOptions > 0 and (#selectedOptions == 1 and selectedOptions[1] or #selectedOptions .. " selected") or "None selected"
+            
+            overlay:Destroy()
+            
+            if callback then
+                callback(selectedOptions)
+            end
+        end)
+    end
+    
+    local function filterOptions(searchText)
+        searchText = searchText:lower()
+        for option, data in pairs(optionFrames) do
+            if searchText == "" or option:lower():find(searchText) then
+                data.frame.Visible = true
+            else
+                data.frame.Visible = false
+            end
+        end
+    end
+    
+    searchBox.Changed:Connect(function()
+        filterOptions(searchBox.Text)
+    end)
+    
+    closeButton.MouseButton1Click:Connect(function()
+        overlay:Destroy()
+    end)
+    
+    overlay.MouseButton1Click:Connect(function()
+        overlay:Destroy()
+    end)
+    
+    dialog.MouseButton1Click:Connect(function(input)
+        input.Handled = true
+    end)
+    
+    dialog.Position = UDim2.new(0.5, -dialogSize[1]/2, 0.5, -dialogSize[2] - 40)
+    local tween = TweenService:Create(dialog, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Position = UDim2.new(0.5, -dialogSize[1]/2, 0.5, -dialogSize[2]/2)})
+    tween:Play()
+    
+    return dialog
 end
 
 function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
@@ -549,7 +898,7 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
     sliderGlow.Name = "SliderGlow"
     sliderGlow.Size = UDim2.new(1, 4, 1, 4)
     sliderGlow.Position = UDim2.new(0, -2, 0, -2)
-    sliderGlow.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+    sliderGlow.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
     sliderGlow.BackgroundTransparency = 1
     sliderGlow.BorderSizePixel = 0
     sliderGlow.ZIndex = 0
@@ -577,7 +926,7 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
     valueLabel.Position = UDim2.new(1, -64, 0, 4)
     valueLabel.BackgroundTransparency = 1
     valueLabel.Text = tostring(currentValue)
-    valueLabel.TextColor3 = Color3.fromRGB(64, 162, 255)
+    valueLabel.TextColor3 = Color3.fromRGB(0, 122, 255)
     valueLabel.TextSize = self.isMobile and 13 or 16
     valueLabel.Font = Enum.Font.GothamBold
     valueLabel.TextXAlignment = Enum.TextXAlignment.Right
@@ -595,17 +944,35 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
     trackCorner.CornerRadius = UDim.new(0, 3)
     trackCorner.Parent = sliderTrack
     
+    local trackGradient = Instance.new("UIGradient")
+    trackGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(38, 42, 52)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(28, 32, 42)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(38, 42, 52))
+    }
+    trackGradient.Rotation = 90
+    trackGradient.Parent = sliderTrack
+    
     local sliderFill = Instance.new("Frame")
     sliderFill.Name = "SliderFill"
     sliderFill.Size = UDim2.new((currentValue - minValue) / (maxValue - minValue), 0, 1, 0)
     sliderFill.Position = UDim2.new(0, 0, 0, 0)
-    sliderFill.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+    sliderFill.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
     sliderFill.BorderSizePixel = 0
     sliderFill.Parent = sliderTrack
     
     local fillCorner = Instance.new("UICorner")
     fillCorner.CornerRadius = UDim.new(0, 3)
     fillCorner.Parent = sliderFill
+    
+    local fillGradient = Instance.new("UIGradient")
+    fillGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 132, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 122, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 102, 235))
+    }
+    fillGradient.Rotation = 90
+    fillGradient.Parent = sliderFill
     
     local knobSize = self.isMobile and 16 or 18
     
@@ -621,6 +988,15 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
     local knobCorner = Instance.new("UICorner")
     knobCorner.CornerRadius = UDim.new(1, 0)
     knobCorner.Parent = sliderKnob
+    
+    local knobGradient = Instance.new("UIGradient")
+    knobGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(0.7, Color3.fromRGB(245, 245, 245)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(235, 235, 235))
+    }
+    knobGradient.Rotation = 45
+    knobGradient.Parent = sliderKnob
     
     local knobShadow = Instance.new("Frame")
     knobShadow.Name = "KnobShadow"
@@ -640,7 +1016,7 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
     knobHighlight.Size = UDim2.new(0, 0, 0, 0)
     knobHighlight.Position = UDim2.new(0.5, 0, 0.5, 0)
     knobHighlight.AnchorPoint = Vector2.new(0.5, 0.5)
-    knobHighlight.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+    knobHighlight.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
     knobHighlight.BackgroundTransparency = 0.6
     knobHighlight.BorderSizePixel = 0
     knobHighlight.ZIndex = 2
@@ -654,7 +1030,7 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
     knobInner.Name = "KnobInner"
     knobInner.Size = UDim2.new(0, 5, 0, 5)
     knobInner.Position = UDim2.new(0.5, -2.5, 0.5, -2.5)
-    knobInner.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+    knobInner.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
     knobInner.BorderSizePixel = 0
     knobInner.ZIndex = 5
     knobInner.Parent = sliderKnob
@@ -748,8 +1124,6 @@ function GUI:addSlider(name, minValue, maxValue, defaultValue, callback)
         end
     end)
     
-    self:animateComponentIn(sliderFrame)
-    
     return sliderFrame
 end
 
@@ -766,7 +1140,7 @@ function GUI:addButton(name, callback)
     button.Name = name .. "Button"
     button.Size = UDim2.new(1, -20, 0, buttonHeight)
     button.Position = UDim2.new(0, 10, 0, 5)
-    button.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+    button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     button.BorderSizePixel = 0
     button.Text = name
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -775,49 +1149,99 @@ function GUI:addButton(name, callback)
     button.Parent = buttonFrame
     
     local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 12)
+    buttonCorner.CornerRadius = UDim.new(0, 10)
     buttonCorner.Parent = button
+    
+    local buttonGradient = Instance.new("UIGradient")
+    buttonGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(88, 86, 214)),
+        ColorSequenceKeypoint.new(0.3, Color3.fromRGB(58, 134, 255)),
+        ColorSequenceKeypoint.new(0.7, Color3.fromRGB(0, 123, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 101, 235))
+    }
+    buttonGradient.Rotation = 135
+    buttonGradient.Parent = button
     
     local buttonGlow = Instance.new("Frame")
     buttonGlow.Name = "ButtonGlow"
-    buttonGlow.Size = UDim2.new(1, 10, 1, 10)
-    buttonGlow.Position = UDim2.new(0, -5, 0, -5)
-    buttonGlow.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+    buttonGlow.Size = UDim2.new(1, 8, 1, 8)
+    buttonGlow.Position = UDim2.new(0, -4, 0, -4)
+    buttonGlow.BackgroundColor3 = Color3.fromRGB(58, 134, 255)
     buttonGlow.BackgroundTransparency = 1
     buttonGlow.BorderSizePixel = 0
     buttonGlow.ZIndex = 0
     buttonGlow.Parent = button
     
     local glowCorner = Instance.new("UICorner")
-    glowCorner.CornerRadius = UDim.new(0, 17)
+    glowCorner.CornerRadius = UDim.new(0, 14)
     glowCorner.Parent = buttonGlow
     
     local buttonShadow = Instance.new("Frame")
     buttonShadow.Name = "ButtonShadow"
     buttonShadow.Size = UDim2.new(1, 8, 1, 8)
-    buttonShadow.Position = UDim2.new(0, -4, 0, 3)
+    buttonShadow.Position = UDim2.new(0, -4, 0, 2)
     buttonShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    buttonShadow.BackgroundTransparency = 0.2
+    buttonShadow.BackgroundTransparency = 0.25
     buttonShadow.ZIndex = -1
     buttonShadow.Parent = button
     
     local shadowCorner = Instance.new("UICorner")
-    shadowCorner.CornerRadius = UDim.new(0, 16)
+    shadowCorner.CornerRadius = UDim.new(0, 14)
     shadowCorner.Parent = buttonShadow
     
+    local shadowGradient = Instance.new("UIGradient")
+    shadowGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 40))
+    }
+    shadowGradient.Rotation = 90
+    shadowGradient.Parent = buttonShadow
+    
+    local highlightLayer = Instance.new("Frame")
+    highlightLayer.Name = "HighlightLayer"
+    highlightLayer.Size = UDim2.new(1, 0, 0.6, 0)
+    highlightLayer.Position = UDim2.new(0, 0, 0, 0)
+    highlightLayer.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    highlightLayer.BackgroundTransparency = 0.7
+    highlightLayer.BorderSizePixel = 0
+    highlightLayer.ZIndex = 1
+    highlightLayer.Parent = button
+    
+    local highlightCorner = Instance.new("UICorner")
+    highlightCorner.CornerRadius = UDim.new(0, 10)
+    highlightCorner.Parent = highlightLayer
+    
+    local highlightGradient = Instance.new("UIGradient")
+    highlightGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+    }
+    highlightGradient.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0, 0.3),
+        NumberSequenceKeypoint.new(0.7, 0.8),
+        NumberSequenceKeypoint.new(1, 1)
+    }
+    highlightGradient.Rotation = 90
+    highlightGradient.Parent = highlightLayer
+    
     button.MouseEnter:Connect(function()
-        local hoverTween = TweenService:Create(button, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-            BackgroundColor3 = Color3.fromRGB(84, 182, 255)
+        local hoverTween = TweenService:Create(buttonGradient, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(108, 106, 234)),
+                ColorSequenceKeypoint.new(0.3, Color3.fromRGB(78, 154, 255)),
+                ColorSequenceKeypoint.new(0.7, Color3.fromRGB(20, 143, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 121, 245))
+            }
         })
-        local glowTween = TweenService:Create(buttonGlow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-            BackgroundTransparency = 0.6
+        local glowTween = TweenService:Create(buttonGlow, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            BackgroundTransparency = 0.5
         })
-        local shadowTween = TweenService:Create(buttonShadow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+        local shadowTween = TweenService:Create(buttonShadow, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
             BackgroundTransparency = 0.1,
-            Position = UDim2.new(0, -4, 0, 5)
+            Position = UDim2.new(0, -4, 0, 4)
         })
-        local scaleTween = TweenService:Create(button, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-            Size = UDim2.new(1, -16, 0, buttonHeight + 4)
+        local scaleTween = TweenService:Create(button, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            Size = UDim2.new(1, -16, 0, buttonHeight + 3)
         })
         hoverTween:Play()
         glowTween:Play()
@@ -826,17 +1250,22 @@ function GUI:addButton(name, callback)
     end)
     
     button.MouseLeave:Connect(function()
-        local hoverTween = TweenService:Create(button, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-            BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+        local hoverTween = TweenService:Create(buttonGradient, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(88, 86, 214)),
+                ColorSequenceKeypoint.new(0.3, Color3.fromRGB(58, 134, 255)),
+                ColorSequenceKeypoint.new(0.7, Color3.fromRGB(0, 123, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 101, 235))
+            }
         })
-        local glowTween = TweenService:Create(buttonGlow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+        local glowTween = TweenService:Create(buttonGlow, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
             BackgroundTransparency = 1
         })
-        local shadowTween = TweenService:Create(buttonShadow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-            BackgroundTransparency = 0.2,
-            Position = UDim2.new(0, -4, 0, 3)
+        local shadowTween = TweenService:Create(buttonShadow, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            BackgroundTransparency = 0.25,
+            Position = UDim2.new(0, -4, 0, 2)
         })
-        local scaleTween = TweenService:Create(button, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+        local scaleTween = TweenService:Create(button, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
             Size = UDim2.new(1, -20, 0, buttonHeight)
         })
         hoverTween:Play()
@@ -860,7 +1289,7 @@ function GUI:addButton(name, callback)
         
         clickTween.Completed:Connect(function()
             local releaseTween = TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-                Size = UDim2.new(1, -16, 0, buttonHeight + 4)
+                Size = UDim2.new(1, -16, 0, buttonHeight + 3)
             })
             releaseTween:Play()
         end)
@@ -894,8 +1323,6 @@ function GUI:addButton(name, callback)
             callback()
         end
     end)
-    
-    self:animateComponentIn(buttonFrame)
     
     return buttonFrame
 end
@@ -944,7 +1371,7 @@ function GUI:addTextInput(name, placeholder, callback)
     underline.Size = UDim2.new(0, 0, 0, 3)
     underline.Position = UDim2.new(0.5, 0, 1, -3)
     underline.AnchorPoint = Vector2.new(0.5, 0)
-    underline.BackgroundColor3 = Color3.fromRGB(64, 162, 255)
+    underline.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
     underline.BorderSizePixel = 0
     underline.Parent = inputContainer
     
@@ -1012,7 +1439,7 @@ function GUI:addTextInput(name, placeholder, callback)
             local labelTween = TweenService:Create(floatingLabel, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
                 Position = UDim2.new(0, 10, 0, -12),
                 TextSize = self.isMobile and 10 or 13,
-                TextColor3 = focused and Color3.fromRGB(64, 162, 255) or Color3.fromRGB(180, 180, 200)
+                TextColor3 = focused and Color3.fromRGB(0, 122, 255) or Color3.fromRGB(180, 180, 200)
             })
             
             local backgroundTween = TweenService:Create(labelBackground, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
@@ -1044,7 +1471,7 @@ function GUI:addTextInput(name, placeholder, callback)
         end
         
         local strokeTween = TweenService:Create(containerStroke, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-            Color = focused and Color3.fromRGB(64, 162, 255) or Color3.fromRGB(68, 72, 82),
+            Color = focused and Color3.fromRGB(0, 122, 255) or Color3.fromRGB(68, 72, 82),
             Thickness = focused and 3 or 2,
             Transparency = focused and 0 or 0.3
         })
@@ -1087,156 +1514,39 @@ function GUI:addTextInput(name, placeholder, callback)
         self:saveComponentState(self.currentSidebarName, componentId, textBox.Text)
     end)
     
-    self:animateComponentIn(inputFrame)
+    inputContainer.MouseEnter:Connect(function()
+        if not textBox:IsFocused() then
+            local hoverTween = TweenService:Create(inputContainer, TweenInfo.new(0.15, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                BackgroundColor3 = Color3.fromRGB(34, 38, 46),
+                BackgroundTransparency = 0.15
+            })
+            
+            local strokeHoverTween = TweenService:Create(containerStroke, TweenInfo.new(0.15), {
+                Transparency = 0.1
+            })
+            
+            hoverTween:Play()
+            strokeHoverTween:Play()
+        end
+    end)
+    
+    inputContainer.MouseLeave:Connect(function()
+        if not textBox:IsFocused() then
+            local hoverTween = TweenService:Create(inputContainer, TweenInfo.new(0.15, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                BackgroundColor3 = Color3.fromRGB(32, 36, 44),
+                BackgroundTransparency = 0.2
+            })
+            
+            local strokeHoverTween = TweenService:Create(containerStroke, TweenInfo.new(0.15), {
+                Transparency = 0.3
+            })
+            
+            hoverTween:Play()
+            strokeHoverTween:Play()
+        end
+    end)
     
     return inputFrame
-end
-
-function GUI:addDropdown(name, options, defaultOption, callback, multiSelect)
-    multiSelect = multiSelect or false
-    local dropdownHeight = self.isMobile and 32 or 36
-    local componentId = name .. "_dropdown"
-    local currentValue = self:getComponentState(self.currentSidebarName, componentId, defaultOption or options[1] or "")
-    
-    self:saveComponentCallback(self.currentSidebarName, componentId, callback)
-    
-    local dropdownFrame = Instance.new("Frame")
-    dropdownFrame.Name = name .. "Dropdown"
-    dropdownFrame.Size = UDim2.new(1, 0, 0, dropdownHeight)
-    dropdownFrame.BackgroundColor3 = Color3.fromRGB(26, 29, 36)
-    dropdownFrame.BorderSizePixel = 0
-    dropdownFrame.Parent = self.contentScrolling
-    
-    local dropdownCorner = Instance.new("UICorner")
-    dropdownCorner.CornerRadius = UDim.new(0, 8)
-    dropdownCorner.Parent = dropdownFrame
-    
-    local dropdownLabel = Instance.new("TextLabel")
-    dropdownLabel.Name = "DropdownLabel"
-    dropdownLabel.Size = UDim2.new(0.5, 0, 1, 0)
-    dropdownLabel.Position = UDim2.new(0, self.isMobile and 12 or 16, 0, 0)
-    dropdownLabel.BackgroundTransparency = 1
-    dropdownLabel.Text = name
-    dropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    dropdownLabel.TextSize = self.isMobile and 12 or 15
-    dropdownLabel.Font = Enum.Font.Gotham
-    dropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
-    dropdownLabel.Parent = dropdownFrame
-    
-    local buttonWidth = self.isMobile and 90 or 110
-    local buttonHeight = self.isMobile and 20 or 24
-    
-    local dropdownButton = Instance.new("TextButton")
-    dropdownButton.Name = "DropdownButton"
-    dropdownButton.Size = UDim2.new(0, buttonWidth, 0, buttonHeight)
-    dropdownButton.Position = UDim2.new(1, -buttonWidth - (self.isMobile and 12 or 16), 0.5, -buttonHeight/2)
-    dropdownButton.BackgroundColor3 = Color3.fromRGB(44, 47, 58)
-    dropdownButton.BorderSizePixel = 0
-    dropdownButton.Text = currentValue
-    dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    dropdownButton.TextSize = self.isMobile and 10 or 13
-    dropdownButton.Font = Enum.Font.Gotham
-    dropdownButton.Parent = dropdownFrame
-    
-    local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 6)
-    buttonCorner.Parent = dropdownButton
-    
-    local arrow = Instance.new("TextLabel")
-    arrow.Name = "Arrow"
-    arrow.Size = UDim2.new(0, 12, 0, 12)
-    arrow.Position = UDim2.new(1, -16, 0.5, -6)
-    arrow.BackgroundTransparency = 1
-    arrow.Text = "▼"
-    arrow.TextColor3 = Color3.fromRGB(180, 180, 200)
-    arrow.TextSize = self.isMobile and 8 or 10
-    arrow.Font = Enum.Font.Gotham
-    arrow.Parent = dropdownButton
-    
-    if multiSelect then
-        self.multiSelectDropdowns[name] = self:getComponentState(self.currentSidebarName, componentId, {})
-        self.dropdownSelections[name] = {}
-    else
-        self.dropdownSelections[name] = currentValue
-    end
-    
-    dropdownButton.MouseButton1Click:Connect(function()
-        self:createDropdownDialog(name, options, currentValue, callback, dropdownButton, multiSelect)
-    end)
-    
-    self:animateComponentIn(dropdownFrame)
-    
-    return dropdownFrame
-end
-
-function GUI:createDropdownDialog(title, options, defaultOption, callback, button, multiSelect)
-    multiSelect = multiSelect or false
-    local dialogSize = self.isMobile and {260, 220} or {300, 260}
-    
-    local overlay = Instance.new("Frame")
-    overlay.Name = "DropdownOverlay"
-    overlay.Size = UDim2.new(1, 0, 1, 0)
-    overlay.Position = UDim2.new(0, 0, 0, 0)
-    overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    overlay.BackgroundTransparency = 0.4
-    overlay.BorderSizePixel = 0
-    overlay.ZIndex = 25
-    overlay.Parent = self.screenGui
-    
-    local dialog = Instance.new("Frame")
-    dialog.Name = "DropdownDialog"
-    dialog.Size = UDim2.new(0, dialogSize[1], 0, dialogSize[2])
-    dialog.Position = UDim2.new(0.5, -dialogSize[1]/2, 0.5, -dialogSize[2]/2)
-    dialog.BackgroundColor3 = Color3.fromRGB(22, 25, 32)
-    dialog.BorderSizePixel = 0
-    dialog.ZIndex = 30
-    dialog.Parent = overlay
-    
-    local dialogCorner = Instance.new("UICorner")
-    dialogCorner.CornerRadius = UDim.new(0, 12)
-    dialogCorner.Parent = dialog
-    
-    local dialogTitle = Instance.new("TextLabel")
-    dialogTitle.Name = "DialogTitle"
-    dialogTitle.Size = UDim2.new(1, -40, 0, 30)
-    dialogTitle.Position = UDim2.new(0, 12, 0, 8)
-    dialogTitle.BackgroundTransparency = 1
-    dialogTitle.Text = "Select " .. title .. (multiSelect and " (Multiple)" or "")
-    dialogTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    dialogTitle.TextSize = self.isMobile and 14 or 18
-    dialogTitle.Font = Enum.Font.GothamBold
-    dialogTitle.TextXAlignment = Enum.TextXAlignment.Left
-    dialogTitle.Parent = dialog
-    
-    local closeButton = Instance.new("TextButton")
-    closeButton.Name = "CloseButton"
-    closeButton.Size = UDim2.new(0, 20, 0, 20)
-    closeButton.Position = UDim2.new(1, -28, 0, 8)
-    closeButton.BackgroundColor3 = Color3.fromRGB(255, 59, 48)
-    closeButton.BorderSizePixel = 0
-    closeButton.Text = "×"
-    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeButton.TextSize = self.isMobile and 10 or 12
-    closeButton.Font = Enum.Font.GothamBold
-    closeButton.Parent = dialog
-    
-    local closeCorner = Instance.new("UICorner")
-    closeCorner.CornerRadius = UDim.new(0, 10)
-    closeCorner.Parent = closeButton
-    
-    closeButton.MouseButton1Click:Connect(function()
-        overlay:Destroy()
-    end)
-    
-    overlay.MouseButton1Click:Connect(function()
-        overlay:Destroy()
-    end)
-    
-    dialog.MouseButton1Click:Connect(function(input)
-        input.Handled = true
-    end)
-    
-    return dialog
 end
 
 function GUI:createDialog(title, content, buttons)
@@ -1315,7 +1625,7 @@ function GUI:createDialog(title, content, buttons)
         local dialogButton = Instance.new("TextButton")
         dialogButton.Name = "DialogButton" .. i
         dialogButton.Size = UDim2.new(0, self.isMobile and 50 or 60, 1, 0)
-        dialogButton.BackgroundColor3 = i == 1 and Color3.fromRGB(64, 162, 255) or Color3.fromRGB(48, 52, 62)
+        dialogButton.BackgroundColor3 = i == 1 and Color3.fromRGB(58, 134, 255) or Color3.fromRGB(48, 52, 62)
         dialogButton.BorderSizePixel = 0
         dialogButton.Text = buttonName
         dialogButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -1335,13 +1645,13 @@ function GUI:createDialog(title, content, buttons)
         end)
         
         dialogButton.MouseEnter:Connect(function()
-            local hoverColor = i == 1 and Color3.fromRGB(84, 182, 255) or Color3.fromRGB(68, 72, 82)
+            local hoverColor = i == 1 and Color3.fromRGB(78, 154, 255) or Color3.fromRGB(68, 72, 82)
             local tween = TweenService:Create(dialogButton, TweenInfo.new(0.15), {BackgroundColor3 = hoverColor})
             tween:Play()
         end)
         
         dialogButton.MouseLeave:Connect(function()
-            local normalColor = i == 1 and Color3.fromRGB(64, 162, 255) or Color3.fromRGB(48, 52, 62)
+            local normalColor = i == 1 and Color3.fromRGB(58, 134, 255) or Color3.fromRGB(48, 52, 62)
             local tween = TweenService:Create(dialogButton, TweenInfo.new(0.15), {BackgroundColor3 = normalColor})
             tween:Play()
         end)
