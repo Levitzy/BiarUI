@@ -1924,12 +1924,34 @@ function GUI:addSlider(
 	minValue: number,
 	maxValue: number,
 	defaultValue: number?,
-	callback: ((number) -> ())?
+	callback: ((number) -> ())?,
+	step: number?,
+	suffix: string?
 )
-	local sliderHeight = if self.isMobile then 46 else 50
+	local sliderHeight = if self.isMobile then 52 else 56
 	local componentId = `{name}_slider`
-	local initialVal = math.clamp(defaultValue or minValue, minValue, maxValue)
-	local currentValue = self:getComponentState(self.currentSidebarName, componentId, initialVal)
+
+	local range = math.max(0.0001, maxValue - minValue)
+	local resolvedStep = step or (if range <= 2 or (defaultValue and defaultValue % 1 ~= 0) then 0.1 else 1)
+	local unitSuffix = suffix or ""
+
+	local function snapValue(raw: number): number
+		local clamped = math.clamp(raw, minValue, maxValue)
+		local snapped = minValue + math.floor(((clamped - minValue) / resolvedStep) + 0.5) * resolvedStep
+		-- Clean floating point precision (e.g. 0.30000000000000004 -> 0.3)
+		return tonumber(string.format("%.4f", math.clamp(snapped, minValue, maxValue))) or minValue
+	end
+
+	local function formatValue(val: number): string
+		if resolvedStep >= 1 and val % 1 == 0 then
+			return `{math.floor(val + 0.5)}{unitSuffix}`
+		end
+		local decimals = math.max(1, math.ceil(-math.log10(resolvedStep)))
+		return `{string.format(`%.{decimals}f`, val)}{unitSuffix}`
+	end
+
+	local initialVal = snapValue(defaultValue or minValue)
+	local currentValue = snapValue(self:getComponentState(self.currentSidebarName, componentId, initialVal))
 
 	self:saveComponentCallback(self.currentSidebarName, componentId, callback)
 
@@ -1944,9 +1966,10 @@ function GUI:addSlider(
 	createCorner(sliderFrame, 8)
 	local cardStroke = createStroke(sliderFrame, self.theme.BorderSubtle, 1, 0.2)
 
+	-- Top Row: Title on Left, Stepper (- [Value] +) on Right
 	local sliderLabel = Instance.new("TextLabel")
 	sliderLabel.Name = "SliderLabel"
-	sliderLabel.Size = UDim2.new(1, -76, 0, 18)
+	sliderLabel.Size = UDim2.new(1, -130, 0, 20)
 	sliderLabel.Position = UDim2.fromOffset(14, 7)
 	sliderLabel.BackgroundTransparency = 1
 	sliderLabel.Text = name
@@ -1957,35 +1980,82 @@ function GUI:addSlider(
 	sliderLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	sliderLabel.Parent = sliderFrame
 
+	local controlsGroup = Instance.new("Frame")
+	controlsGroup.Name = "ControlsGroup"
+	controlsGroup.Size = UDim2.fromOffset(98, 20)
+	controlsGroup.Position = UDim2.new(1, -112, 0, 7)
+	controlsGroup.BackgroundTransparency = 1
+	controlsGroup.Parent = sliderFrame
+
+	local minusBtn = Instance.new("TextButton")
+	minusBtn.Name = "MinusButton"
+	minusBtn.Size = UDim2.fromOffset(20, 20)
+	minusBtn.Position = UDim2.fromOffset(0, 0)
+	minusBtn.BackgroundColor3 = self.theme.Control
+	minusBtn.BorderSizePixel = 0
+	minusBtn.Text = ""
+	minusBtn.AutoButtonColor = false
+	minusBtn.Parent = controlsGroup
+	createCorner(minusBtn, 5)
+	local minusStroke = createStroke(minusBtn, self.theme.BorderSubtle, 1, 0.25)
+
+	local minusIcon = self:createIcon("minus", 10, self.theme.TextSecondary, minusBtn)
+	minusIcon.Position = UDim2.fromScale(0.5, 0.5)
+	minusIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+
 	local valueBadge = Instance.new("Frame")
 	valueBadge.Name = "ValueBadge"
-	valueBadge.Size = UDim2.fromOffset(44, 18)
-	valueBadge.Position = UDim2.new(1, -58, 0, 7)
+	valueBadge.Size = UDim2.fromOffset(50, 20)
+	valueBadge.Position = UDim2.fromOffset(24, 0)
 	valueBadge.BackgroundColor3 = self.theme.Control
 	valueBadge.BorderSizePixel = 0
-	valueBadge.Parent = sliderFrame
-	createCorner(valueBadge, 4)
+	valueBadge.Parent = controlsGroup
+	createCorner(valueBadge, 5)
+	local badgeStroke = createStroke(valueBadge, self.theme.BorderSubtle, 1, 0.2)
 
-	local valueLabel = Instance.new("TextLabel")
+	-- Interactive TextBox (named ValueLabel for backwards compatibility)
+	local valueLabel = Instance.new("TextBox")
 	valueLabel.Name = "ValueLabel"
-	valueLabel.Size = UDim2.fromScale(1, 1)
+	valueLabel.Size = UDim2.new(1, -6, 1, 0)
+	valueLabel.Position = UDim2.fromOffset(3, 0)
 	valueLabel.BackgroundTransparency = 1
-	valueLabel.Text = tostring(currentValue)
+	valueLabel.Text = formatValue(currentValue)
 	valueLabel.TextColor3 = self.theme.Accent
+	valueLabel.PlaceholderColor3 = self.theme.TextMuted
 	valueLabel.TextSize = 11
 	valueLabel.Font = Enum.Font.GothamBold
+	valueLabel.TextXAlignment = Enum.TextXAlignment.Center
+	valueLabel.ClearTextOnFocus = false
 	valueLabel.Parent = valueBadge
 
+	local plusBtn = Instance.new("TextButton")
+	plusBtn.Name = "PlusButton"
+	plusBtn.Size = UDim2.fromOffset(20, 20)
+	plusBtn.Position = UDim2.fromOffset(78, 0)
+	plusBtn.BackgroundColor3 = self.theme.Control
+	plusBtn.BorderSizePixel = 0
+	plusBtn.Text = ""
+	plusBtn.AutoButtonColor = false
+	plusBtn.Parent = controlsGroup
+	createCorner(plusBtn, 5)
+	local plusStroke = createStroke(plusBtn, self.theme.BorderSubtle, 1, 0.25)
+
+	local plusIcon = self:createIcon("plus", 10, self.theme.TextSecondary, plusBtn)
+	plusIcon.Position = UDim2.fromScale(0.5, 0.5)
+	plusIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+
+	-- Bottom Row: Minimalist Track, Fill, Halo, and Thumb
+	local trackHeight = 6
 	local sliderTrack = Instance.new("Frame")
 	sliderTrack.Name = "SliderTrack"
-	sliderTrack.Size = UDim2.new(1, -28, 0, 5)
-	sliderTrack.Position = UDim2.new(0, 14, 1, -14)
+	sliderTrack.Size = UDim2.new(1, -28, 0, trackHeight)
+	sliderTrack.Position = UDim2.new(0, 14, 1, -15)
 	sliderTrack.BackgroundColor3 = self.theme.Control
 	sliderTrack.BorderSizePixel = 0
 	sliderTrack.Parent = sliderFrame
-	createCorner(sliderTrack, 3)
+	createCorner(sliderTrack, trackHeight / 2)
+	local trackStroke = createStroke(sliderTrack, self.theme.BorderSubtle, 1, 0.35)
 
-	local range = math.max(0.0001, maxValue - minValue)
 	local initialAlpha = math.clamp((currentValue - minValue) / range, 0, 1)
 
 	local sliderFill = Instance.new("Frame")
@@ -1993,8 +2063,16 @@ function GUI:addSlider(
 	sliderFill.Size = UDim2.fromScale(initialAlpha, 1)
 	sliderFill.BackgroundColor3 = self.theme.Accent
 	sliderFill.BorderSizePixel = 0
+	sliderFill.ZIndex = 2
 	sliderFill.Parent = sliderTrack
-	createCorner(sliderFill, 3)
+	createCorner(sliderFill, trackHeight / 2)
+
+	local fillGradient = Instance.new("UIGradient")
+	fillGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, self.theme.Accent),
+		ColorSequenceKeypoint.new(1, self.theme.AccentHover),
+	})
+	fillGradient.Parent = sliderFill
 
 	local knobSize = 14
 	local sliderKnob = Instance.new("Frame")
@@ -2004,50 +2082,139 @@ function GUI:addSlider(
 	sliderKnob.AnchorPoint = Vector2.new(0.5, 0.5)
 	sliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	sliderKnob.BorderSizePixel = 0
-	sliderKnob.ZIndex = 3
+	sliderKnob.ZIndex = 4
 	sliderKnob.Parent = sliderTrack
 	createCorner(sliderKnob, knobSize)
-	createStroke(sliderKnob, self.theme.Accent, 2, 0)
+	local knobStroke = createStroke(sliderKnob, self.theme.Accent, 2, 0)
+
+	-- Soft radial halo around the thumb on hover/drag
+	local knobHalo = Instance.new("Frame")
+	knobHalo.Name = "KnobHalo"
+	knobHalo.Size = UDim2.fromOffset(0, 0)
+	knobHalo.Position = UDim2.fromScale(0.5, 0.5)
+	knobHalo.AnchorPoint = Vector2.new(0.5, 0.5)
+	knobHalo.BackgroundColor3 = self.theme.Accent
+	knobHalo.BackgroundTransparency = 1
+	knobHalo.BorderSizePixel = 0
+	knobHalo.ZIndex = 3
+	knobHalo.Parent = sliderKnob
+	createCorner(knobHalo, 30)
+
+	-- Inner accent core dot
+	local knobCore = Instance.new("Frame")
+	knobCore.Name = "KnobCore"
+	knobCore.Size = UDim2.fromOffset(4, 4)
+	knobCore.Position = UDim2.fromScale(0.5, 0.5)
+	knobCore.AnchorPoint = Vector2.new(0.5, 0.5)
+	knobCore.BackgroundColor3 = self.theme.Accent
+	knobCore.BorderSizePixel = 0
+	knobCore.ZIndex = 5
+	knobCore.Parent = sliderKnob
+	createCorner(knobCore, 4)
 
 	-- Enlarged invisible hit box for effortless touch & mouse dragging
 	local hitArea = Instance.new("TextButton")
 	hitArea.Name = "HitArea"
-	hitArea.Size = UDim2.new(1, 16, 0, 22)
+	hitArea.Size = UDim2.new(1, 18, 0, 24)
 	hitArea.Position = UDim2.fromScale(0.5, 0.5)
 	hitArea.AnchorPoint = Vector2.new(0.5, 0.5)
 	hitArea.BackgroundTransparency = 1
 	hitArea.Text = ""
-	hitArea.ZIndex = 4
+	hitArea.AutoButtonColor = false
+	hitArea.ZIndex = 6
 	hitArea.Parent = sliderTrack
 
 	local dragging = false
+	local hoveringTrack = false
 
-	local function updateSlider(input: InputObject)
-		local trackWidth = math.max(1, sliderTrack.AbsoluteSize.X)
-		local relativePos = math.clamp((input.Position.X - sliderTrack.AbsolutePosition.X) / trackWidth, 0, 1)
-		local actualValue = math.floor(minValue + (maxValue - minValue) * relativePos + 0.5)
+	local function applyValue(newVal: number, fireCallback: boolean)
+		local snapped = snapValue(newVal)
+		currentValue = snapped
+		local alpha = math.clamp((snapped - minValue) / range, 0, 1)
 
-		valueLabel.Text = tostring(actualValue)
+		if not valueLabel:IsFocused() then
+			valueLabel.Text = formatValue(snapped)
+		end
 
-		TweenService:Create(sliderFill, TweenInfo.new(0.08, Enum.EasingStyle.Quart), {
-			Size = UDim2.fromScale(relativePos, 1),
+		local tweenTime = if dragging then 0.05 else 0.14
+		local tInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+
+		TweenService:Create(sliderFill, tInfo, {
+			Size = UDim2.fromScale(alpha, 1),
 		}):Play()
-		TweenService:Create(sliderKnob, TweenInfo.new(0.08, Enum.EasingStyle.Quart), {
-			Position = UDim2.fromScale(relativePos, 0.5),
+		TweenService:Create(sliderKnob, tInfo, {
+			Position = UDim2.fromScale(alpha, 0.5),
 		}):Play()
 
-		self:saveComponentState(self.currentSidebarName, componentId, actualValue)
-		if callback then
-			callback(actualValue)
+		self:saveComponentState(self.currentSidebarName, componentId, snapped)
+		if fireCallback and callback then
+			callback(snapped)
 		end
 	end
+
+	local function updateFromInput(input: InputObject)
+		local trackWidth = math.max(1, sliderTrack.AbsoluteSize.X)
+		local relativePos = math.clamp((input.Position.X - sliderTrack.AbsolutePosition.X) / trackWidth, 0, 1)
+		local rawVal = minValue + (maxValue - minValue) * relativePos
+		applyValue(rawVal, true)
+	end
+
+	local function setVisualActive(active: boolean)
+		if active then
+			TweenService:Create(sliderFrame, FAST_TWEEN, { BackgroundColor3 = self.theme.SurfaceHover }):Play()
+			TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0.1 }):Play()
+			TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0 }):Play()
+			TweenService:Create(valueBadge, FAST_TWEEN, { BackgroundColor3 = self.theme.AccentSoft }):Play()
+			TweenService:Create(sliderKnob, FAST_TWEEN, { Size = UDim2.fromOffset(knobSize + 2, knobSize + 2) }):Play()
+			TweenService:Create(knobCore, FAST_TWEEN, { Size = UDim2.fromOffset(6, 6) }):Play()
+			TweenService:Create(knobHalo, FAST_TWEEN, {
+				Size = UDim2.fromOffset(26, 26),
+				BackgroundTransparency = 0.78,
+			}):Play()
+		else
+			TweenService:Create(sliderFrame, FAST_TWEEN, { BackgroundColor3 = self.theme.Surface }):Play()
+			TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.2 }):Play()
+			TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.2 }):Play()
+			TweenService:Create(valueBadge, FAST_TWEEN, { BackgroundColor3 = self.theme.Control }):Play()
+			TweenService:Create(sliderKnob, FAST_TWEEN, { Size = UDim2.fromOffset(knobSize, knobSize) }):Play()
+			TweenService:Create(knobCore, FAST_TWEEN, { Size = UDim2.fromOffset(4, 4) }):Play()
+			TweenService:Create(knobHalo, FAST_TWEEN, {
+				Size = if hoveringTrack then UDim2.fromOffset(22, 22) else UDim2.fromOffset(0, 0),
+				BackgroundTransparency = if hoveringTrack then 0.86 else 1,
+			}):Play()
+		end
+	end
+
+	hitArea.MouseEnter:Connect(function()
+		hoveringTrack = true
+		TweenService:Create(trackStroke, FAST_TWEEN, { Color = self.theme.Border, Transparency = 0.1 }):Play()
+		if not dragging then
+			TweenService:Create(knobHalo, FAST_TWEEN, {
+				Size = UDim2.fromOffset(22, 22),
+				BackgroundTransparency = 0.86,
+			}):Play()
+		end
+	end)
+
+	hitArea.MouseLeave:Connect(function()
+		hoveringTrack = false
+		TweenService:Create(trackStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.35 }):Play()
+		if not dragging then
+			TweenService:Create(knobHalo, FAST_TWEEN, {
+				Size = UDim2.fromOffset(0, 0),
+				BackgroundTransparency = 1,
+			}):Play()
+		end
+	end)
 
 	hitArea.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
-			TweenService:Create(sliderKnob, FAST_TWEEN, { Size = UDim2.fromOffset(knobSize + 3, knobSize + 3) }):Play()
-			TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.Accent }):Play()
-			updateSlider(input)
+			if self.contentScrolling then
+				self.contentScrolling.ScrollingEnabled = false
+			end
+			setVisualActive(true)
+			updateFromInput(input)
 		end
 	end)
 
@@ -2061,7 +2228,7 @@ function GUI:addSlider(
 					or input.UserInputType == Enum.UserInputType.Touch
 				)
 			then
-				updateSlider(input)
+				updateFromInput(input)
 			end
 		end)
 	)
@@ -2077,11 +2244,50 @@ function GUI:addSlider(
 				)
 			then
 				dragging = false
-				TweenService:Create(sliderKnob, FAST_TWEEN, { Size = UDim2.fromOffset(knobSize, knobSize) }):Play()
-				TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
+				if self.contentScrolling then
+					self.contentScrolling.ScrollingEnabled = true
+				end
+				setVisualActive(false)
 			end
 		end)
 	)
+
+	-- Stepper buttons (- / +)
+	local function bindStepBtn(btn: TextButton, stroke: UIStroke, icon: GuiObject, delta: number)
+		btn.MouseEnter:Connect(function()
+			TweenService:Create(btn, FAST_TWEEN, { BackgroundColor3 = self.theme.ControlHover }):Play()
+			TweenService:Create(stroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0.1 }):Play()
+			self:tintIcon(icon, self.theme.Text)
+		end)
+		btn.MouseLeave:Connect(function()
+			TweenService:Create(btn, FAST_TWEEN, { BackgroundColor3 = self.theme.Control }):Play()
+			TweenService:Create(stroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.25 }):Play()
+			self:tintIcon(icon, self.theme.TextSecondary)
+		end)
+		btn.MouseButton1Click:Connect(function()
+			applyValue(currentValue + delta, true)
+		end)
+	end
+
+	bindStepBtn(minusBtn, minusStroke, minusIcon, -resolvedStep)
+	bindStepBtn(plusBtn, plusStroke, plusIcon, resolvedStep)
+
+	-- Direct numeric entry via ValueLabel TextBox
+	valueLabel.Focused:Connect(function()
+		valueLabel.Text = tostring(currentValue)
+		TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0 }):Play()
+	end)
+
+	valueLabel.FocusLost:Connect(function()
+		TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.2 }):Play()
+		local cleaned = valueLabel.Text:gsub("[^%d%.%-]", "")
+		local parsed = tonumber(cleaned)
+		if parsed then
+			applyValue(parsed, true)
+		else
+			valueLabel.Text = formatValue(currentValue)
+		end
+	end)
 
 	return sliderFrame
 end
