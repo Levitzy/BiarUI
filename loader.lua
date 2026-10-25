@@ -509,7 +509,7 @@ function GUI.new(title: string?, options: GUIOptions?)
 	self.uiScale.Scale = 1
 	self.uiScale.Parent = self.mainFrame
 
-	createCorner(self.mainFrame, 10)
+	createCorner(self.mainFrame, 14)
 	self.mainStroke = createStroke(self.mainFrame, self.theme.Border, 1, 0)
 
 	self:createTitleBar(self.titleText)
@@ -613,6 +613,7 @@ function GUI:createTitleBar(title: string)
 	self.titleBar.Size = UDim2.new(1, 0, 0, titleHeight)
 	self.titleBar.Position = UDim2.fromOffset(0, 0)
 	self.titleBar.BackgroundColor3 = self.theme.TitleBar
+	self.titleBar.BackgroundTransparency = 1
 	self.titleBar.BorderSizePixel = 0
 	self.titleBar.ZIndex = 5
 	self.titleBar.Parent = self.mainFrame
@@ -880,6 +881,26 @@ function GUI:createSidebar()
 	self.sidebar.BorderSizePixel = 0
 	self.sidebar.ClipsDescendants = true
 	self.sidebar.Parent = self.mainFrame
+	createCorner(self.sidebar, 14)
+
+	-- Keep top-left, top-right, and bottom-right corners flush while bottom-left stays rounded (14px)
+	local topCornerMask = Instance.new("Frame")
+	topCornerMask.Name = "TopCornerMask"
+	topCornerMask.Size = UDim2.new(1, 0, 0, 14)
+	topCornerMask.Position = UDim2.fromOffset(0, 0)
+	topCornerMask.BackgroundColor3 = self.theme.Sidebar
+	topCornerMask.BorderSizePixel = 0
+	topCornerMask.ZIndex = 0
+	topCornerMask.Parent = self.sidebar
+
+	local bottomRightMask = Instance.new("Frame")
+	bottomRightMask.Name = "BottomRightMask"
+	bottomRightMask.Size = UDim2.fromOffset(14, 14)
+	bottomRightMask.Position = UDim2.new(1, -14, 1, -14)
+	bottomRightMask.BackgroundColor3 = self.theme.Sidebar
+	bottomRightMask.BorderSizePixel = 0
+	bottomRightMask.ZIndex = 0
+	bottomRightMask.Parent = self.sidebar
 
 	-- Hairline vertical divider on right edge of sidebar
 	local borderRight = Instance.new("Frame")
@@ -888,6 +909,7 @@ function GUI:createSidebar()
 	borderRight.Position = UDim2.new(1, -1, 0, 0)
 	borderRight.BackgroundColor3 = self.theme.BorderSubtle
 	borderRight.BorderSizePixel = 0
+	borderRight.ZIndex = 2
 	borderRight.Parent = self.sidebar
 
 	local topOffset = if self.isMobile then 42 else 46
@@ -923,7 +945,7 @@ function GUI:createSearchBar()
 	self.searchFrame.BorderSizePixel = 0
 	self.searchFrame.Parent = self.sidebar
 
-	createCorner(self.searchFrame, 6)
+	createCorner(self.searchFrame, 8)
 	local searchStroke = createStroke(self.searchFrame, self.theme.BorderSubtle, 1, 0)
 
 	local searchIcon = self:createIcon("search", 12, self.theme.TextMuted, self.searchFrame)
@@ -969,6 +991,7 @@ function GUI:createContentArea()
 	self.contentArea.Size = UDim2.new(1, -sidebarWidth, 1, -titleHeight)
 	self.contentArea.Position = UDim2.fromOffset(sidebarWidth, titleHeight)
 	self.contentArea.BackgroundColor3 = self.theme.Background
+	self.contentArea.BackgroundTransparency = 1
 	self.contentArea.BorderSizePixel = 0
 	self.contentArea.Parent = self.mainFrame
 
@@ -1034,7 +1057,7 @@ function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: strin
 	item.BorderSizePixel = 0
 	item.Parent = self.sidebarScrolling
 
-	createCorner(item, 6)
+	createCorner(item, 8)
 
 	local iconObj = self:createIcon(resolvedIcon, 13, self.theme.TextMuted, item)
 	iconObj.Position = UDim2.new(0, 10, 0.5, 0)
@@ -1212,7 +1235,7 @@ function GUI:addLabel(text: string)
 	labelFrame.BorderSizePixel = 0
 	labelFrame.LayoutOrder = self:_nextOrder()
 	labelFrame.Parent = self.contentScrolling
-	createCorner(labelFrame, 7)
+	createCorner(labelFrame, 10)
 	createStroke(labelFrame, self.theme.BorderSubtle, 1, 0)
 
 	local icon = self:createIcon("info", 13, self.theme.TextSecondary, labelFrame)
@@ -1250,7 +1273,7 @@ function GUI:addToggle(name: string, defaultValue: boolean?, callback: ((boolean
 	toggleFrame.LayoutOrder = self:_nextOrder()
 	toggleFrame.Parent = self.contentScrolling
 
-	createCorner(toggleFrame, 7)
+	createCorner(toggleFrame, 10)
 	local cardStroke = createStroke(toggleFrame, self.theme.BorderSubtle, 1, 0)
 
 	local toggleLabel = Instance.new("TextLabel")
@@ -1376,7 +1399,7 @@ function GUI:addDropdown(
 	dropdownFrame.LayoutOrder = self:_nextOrder()
 	dropdownFrame.Parent = self.contentScrolling
 
-	createCorner(dropdownFrame, 7)
+	createCorner(dropdownFrame, 10)
 	local cardStroke = createStroke(dropdownFrame, self.theme.BorderSubtle, 1, 0)
 
 	local dropdownLabel = Instance.new("TextLabel")
@@ -1405,7 +1428,7 @@ function GUI:addDropdown(
 	dropdownButton.Text = ""
 	dropdownButton.Parent = dropdownFrame
 
-	createCorner(dropdownButton, 5)
+	createCorner(dropdownButton, 8)
 	local btnStroke = createStroke(dropdownButton, self.theme.BorderSubtle, 1, 0)
 
 	local displayText = ""
@@ -1521,7 +1544,7 @@ function GUI:createDropdownDialog(
 	dialogScale.Scale = 0.94
 	dialogScale.Parent = dialog
 
-	createCorner(dialog, 9)
+	createCorner(dialog, 14)
 	createStroke(dialog, self.theme.Border, 1, 0)
 
 	local dialogTitle = Instance.new("TextLabel")
@@ -1834,7 +1857,7 @@ function GUI:addButton(name: string, callback: (() -> ())?, iconName: string?)
 	button.ClipsDescendants = true
 	button.Parent = buttonFrame
 
-	createCorner(button, 7)
+	createCorner(button, 10)
 	local btnStroke = createStroke(button, self.theme.BorderSubtle, 1, 0)
 
 	if iconName then
@@ -1935,7 +1958,7 @@ function GUI:addSlider(
 	sliderFrame.LayoutOrder = self:_nextOrder()
 	sliderFrame.Parent = self.contentScrolling
 
-	createCorner(sliderFrame, 7)
+	createCorner(sliderFrame, 10)
 	local cardStroke = createStroke(sliderFrame, self.theme.BorderSubtle, 1, 0)
 
 	-- Top Row: Label on Left, Compact Stepper (- [Value] +) on Right
@@ -1968,7 +1991,7 @@ function GUI:addSlider(
 	minusBtn.Text = ""
 	minusBtn.AutoButtonColor = false
 	minusBtn.Parent = controlsGroup
-	createCorner(minusBtn, 4)
+	createCorner(minusBtn, 6)
 
 	local minusIcon = self:createIcon("minus", 9, self.theme.TextMuted, minusBtn)
 	minusIcon.Position = UDim2.fromScale(0.5, 0.5)
@@ -1981,7 +2004,7 @@ function GUI:addSlider(
 	valueBadge.BackgroundColor3 = self.theme.Control
 	valueBadge.BorderSizePixel = 0
 	valueBadge.Parent = controlsGroup
-	createCorner(valueBadge, 4)
+	createCorner(valueBadge, 6)
 	local badgeStroke = createStroke(valueBadge, self.theme.BorderSubtle, 1, 0)
 
 	local valueLabel = Instance.new("TextBox")
@@ -2007,7 +2030,7 @@ function GUI:addSlider(
 	plusBtn.Text = ""
 	plusBtn.AutoButtonColor = false
 	plusBtn.Parent = controlsGroup
-	createCorner(plusBtn, 4)
+	createCorner(plusBtn, 6)
 
 	local plusIcon = self:createIcon("plus", 9, self.theme.TextMuted, plusBtn)
 	plusIcon.Position = UDim2.fromScale(0.5, 0.5)
@@ -2252,7 +2275,7 @@ function GUI:addTextInput(name: string, placeholder: string?, callback: ((string
 	inputFrame.LayoutOrder = self:_nextOrder()
 	inputFrame.Parent = self.contentScrolling
 
-	createCorner(inputFrame, 7)
+	createCorner(inputFrame, 10)
 	local cardStroke = createStroke(inputFrame, self.theme.BorderSubtle, 1, 0)
 
 	local labelName = Instance.new("TextLabel")
@@ -2277,7 +2300,7 @@ function GUI:addTextInput(name: string, placeholder: string?, callback: ((string
 	inputContainer.BorderSizePixel = 0
 	inputContainer.Parent = inputFrame
 
-	createCorner(inputContainer, 5)
+	createCorner(inputContainer, 8)
 	local containerStroke = createStroke(inputContainer, self.theme.BorderSubtle, 1, 0)
 
 	local textBox = Instance.new("TextBox")
@@ -2352,7 +2375,7 @@ function GUI:createDialog(title: string, content: string, buttons: { { any } }?)
 	dialogScale.Scale = 0.94
 	dialogScale.Parent = dialog
 
-	createCorner(dialog, 9)
+	createCorner(dialog, 14)
 	createStroke(dialog, self.theme.Border, 1, 0)
 
 	local dialogTitle = Instance.new("TextLabel")
@@ -2483,7 +2506,7 @@ function GUI:notify(title: string, message: string, duration: number?)
 	toast.BorderSizePixel = 0
 	toast.ZIndex = 61
 	toast.Parent = self.notificationHost
-	createCorner(toast, 8)
+	createCorner(toast, 10)
 	createStroke(toast, self.theme.Border, 1, 0)
 
 	local accentBar = Instance.new("Frame")
