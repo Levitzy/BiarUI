@@ -35,21 +35,22 @@ export type GUIOptions = {
 	size: { number }?,
 	toggleKey: Enum.KeyCode?,
 	accentColor: Color3?,
+	sidebarExpanded: boolean?,
 }
 
--- Refined Neutral Zinc / Carbon Palettes (Linear / Geist / Shadcn inspired)
+-- Refined Neutral Zinc / Carbon Palettes (Vercel / Arc / Geist Frame-in-Frame architecture)
 local Themes: { [string]: ThemePalette } = {
 	Dark = {
-		Background = Color3.fromRGB(10, 10, 12),
-		Sidebar = Color3.fromRGB(13, 13, 16),
-		TitleBar = Color3.fromRGB(10, 10, 12),
-		Surface = Color3.fromRGB(17, 17, 21),
-		SurfaceHover = Color3.fromRGB(22, 22, 27),
-		SurfaceActive = Color3.fromRGB(26, 26, 33),
-		Control = Color3.fromRGB(23, 23, 28),
-		ControlHover = Color3.fromRGB(31, 31, 38),
-		Border = Color3.fromRGB(42, 42, 50),
-		BorderSubtle = Color3.fromRGB(28, 28, 34),
+		Background = Color3.fromRGB(9, 9, 11), -- Recessed inner canvas (#09090B)
+		Sidebar = Color3.fromRGB(14, 14, 18), -- Outer shell & icon rail (#0E0E12)
+		TitleBar = Color3.fromRGB(14, 14, 18),
+		Surface = Color3.fromRGB(16, 16, 20), -- Component cards (#101014)
+		SurfaceHover = Color3.fromRGB(21, 21, 27),
+		SurfaceActive = Color3.fromRGB(26, 26, 34),
+		Control = Color3.fromRGB(23, 23, 29),
+		ControlHover = Color3.fromRGB(31, 31, 39),
+		Border = Color3.fromRGB(42, 42, 52),
+		BorderSubtle = Color3.fromRGB(25, 25, 32),
 		Accent = Color3.fromRGB(99, 102, 241),
 		AccentHover = Color3.fromRGB(129, 140, 248),
 		AccentSoft = Color3.fromRGB(28, 29, 54),
@@ -479,7 +480,8 @@ function GUI.new(title: string?, options: GUIOptions?)
 	self.componentStates = {}
 	self.componentCallbacks = {}
 	self._layoutOrder = 0
-	self._sidebarCollapsed = false
+	self._sidebarExpanded = opts.sidebarExpanded == true
+	self._sidebarCollapsed = not self._sidebarExpanded
 	self._minimized = false
 
 	self:_detectDevice()
@@ -494,12 +496,13 @@ function GUI.new(title: string?, options: GUIOptions?)
 	local baseWidth, baseHeight = self:_computeWindowMetrics(opts.size)
 	self.baseSize = Vector2.new(baseWidth, baseHeight)
 
+	-- Outer Frame-in-Frame Shell (Concept 2: Vercel / Arc Architecture)
 	self.mainFrame = Instance.new("Frame")
 	self.mainFrame.Name = "MainFrame"
 	self.mainFrame.Size = UDim2.fromOffset(baseWidth, baseHeight)
 	self.mainFrame.Position = UDim2.fromScale(0.5, 0.5)
 	self.mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-	self.mainFrame.BackgroundColor3 = self.theme.Background
+	self.mainFrame.BackgroundColor3 = self.theme.Sidebar
 	self.mainFrame.BorderSizePixel = 0
 	self.mainFrame.ClipsDescendants = true
 	self.mainFrame.ZIndex = 2
@@ -516,6 +519,7 @@ function GUI.new(title: string?, options: GUIOptions?)
 	self:createSidebar()
 	self:createContentArea()
 	self:createSearchBar()
+	self:_createRailTooltip()
 	self:_createFloatingPill()
 	self:_createNotificationHost()
 
@@ -607,6 +611,8 @@ end
 function GUI:createTitleBar(title: string)
 	local titleHeight = if self.isMobile then 36 else 38
 	self.titleHeight = titleHeight
+	local railCompactW = if self.isMobile then 44 else 48
+	local toggleBtnX = math.floor((railCompactW - 24) * 0.5)
 
 	self.titleBar = Instance.new("Frame")
 	self.titleBar.Name = "TitleBar"
@@ -618,27 +624,18 @@ function GUI:createTitleBar(title: string)
 	self.titleBar.ZIndex = 5
 	self.titleBar.Parent = self.mainFrame
 
-	-- Razor-thin bottom hairline divider
-	local divider = Instance.new("Frame")
-	divider.Name = "Divider"
-	divider.Size = UDim2.new(1, 0, 0, 1)
-	divider.Position = UDim2.new(0, 0, 1, -1)
-	divider.BackgroundColor3 = self.theme.BorderSubtle
-	divider.BorderSizePixel = 0
-	divider.Parent = self.titleBar
-
-	-- Sidebar toggle button
+	-- Sidebar rail expand/collapse toggle button (aligned with the vertical icon rail)
 	self.sidebarToggleBtn = Instance.new("TextButton")
 	self.sidebarToggleBtn.Name = "SidebarToggle"
 	self.sidebarToggleBtn.Size = UDim2.fromOffset(24, 24)
-	self.sidebarToggleBtn.Position = UDim2.new(0, 10, 0.5, -12)
+	self.sidebarToggleBtn.Position = UDim2.new(0, toggleBtnX, 0.5, -12)
 	self.sidebarToggleBtn.BackgroundColor3 = self.theme.SurfaceHover
 	self.sidebarToggleBtn.BackgroundTransparency = 1
 	self.sidebarToggleBtn.BorderSizePixel = 0
 	self.sidebarToggleBtn.Text = ""
 	self.sidebarToggleBtn.AutoButtonColor = false
 	self.sidebarToggleBtn.Parent = self.titleBar
-	createCorner(self.sidebarToggleBtn, 6)
+	createCorner(self.sidebarToggleBtn, 7)
 
 	local sidebarIcon = self:createIcon("sidebar", 13, self.theme.TextSecondary, self.sidebarToggleBtn)
 	sidebarIcon.Position = UDim2.fromScale(0.5, 0.5)
@@ -656,11 +653,11 @@ function GUI:createTitleBar(title: string)
 		self:toggleSidebar()
 	end)
 
-	-- Subtle vertical separator
+	-- Subtle vertical separator aligned with the inset canvas left edge
 	local sep = Instance.new("Frame")
 	sep.Name = "HeaderSep"
 	sep.Size = UDim2.fromOffset(1, 12)
-	sep.Position = UDim2.new(0, 41, 0.5, -6)
+	sep.Position = UDim2.new(0, railCompactW, 0.5, -6)
 	sep.BackgroundColor3 = self.theme.BorderSubtle
 	sep.BorderSizePixel = 0
 	sep.Parent = self.titleBar
@@ -668,8 +665,8 @@ function GUI:createTitleBar(title: string)
 	-- Title label
 	local titleLabel = Instance.new("TextLabel")
 	titleLabel.Name = "TitleLabel"
-	titleLabel.Size = UDim2.new(1, -124, 1, 0)
-	titleLabel.Position = UDim2.fromOffset(50, 0)
+	titleLabel.Size = UDim2.new(0, 180, 1, 0)
+	titleLabel.Position = UDim2.fromOffset(railCompactW + 10, 0)
 	titleLabel.BackgroundTransparency = 1
 	titleLabel.Text = title
 	titleLabel.TextColor3 = self.theme.Text
@@ -684,14 +681,14 @@ function GUI:createTitleBar(title: string)
 	self.minimizeButton = Instance.new("TextButton")
 	self.minimizeButton.Name = "MinimizeButton"
 	self.minimizeButton.Size = UDim2.fromOffset(24, 24)
-	self.minimizeButton.Position = UDim2.new(1, -60, 0.5, -12)
+	self.minimizeButton.Position = UDim2.new(1, -58, 0.5, -12)
 	self.minimizeButton.BackgroundColor3 = self.theme.SurfaceHover
 	self.minimizeButton.BackgroundTransparency = 1
 	self.minimizeButton.BorderSizePixel = 0
 	self.minimizeButton.Text = ""
 	self.minimizeButton.AutoButtonColor = false
 	self.minimizeButton.Parent = self.titleBar
-	createCorner(self.minimizeButton, 6)
+	createCorner(self.minimizeButton, 7)
 
 	local minIcon = self:createIcon("minimize", 11, self.theme.TextSecondary, self.minimizeButton)
 	minIcon.Position = UDim2.fromScale(0.5, 0.5)
@@ -713,14 +710,14 @@ function GUI:createTitleBar(title: string)
 	self.closeButton = Instance.new("TextButton")
 	self.closeButton.Name = "CloseButton"
 	self.closeButton.Size = UDim2.fromOffset(24, 24)
-	self.closeButton.Position = UDim2.new(1, -32, 0.5, -12)
+	self.closeButton.Position = UDim2.new(1, -30, 0.5, -12)
 	self.closeButton.BackgroundColor3 = self.theme.Danger
 	self.closeButton.BackgroundTransparency = 1
 	self.closeButton.BorderSizePixel = 0
 	self.closeButton.Text = ""
 	self.closeButton.AutoButtonColor = false
 	self.closeButton.Parent = self.titleBar
-	createCorner(self.closeButton, 6)
+	createCorner(self.closeButton, 7)
 
 	local closeIcon = self:createIcon("close", 11, self.theme.TextSecondary, self.closeButton)
 	closeIcon.Position = UDim2.fromScale(0.5, 0.5)
@@ -739,13 +736,61 @@ function GUI:createTitleBar(title: string)
 	end)
 end
 
+function GUI:_createRailTooltip()
+	local tooltip = Instance.new("Frame")
+	tooltip.Name = "RailTooltip"
+	tooltip.Size = UDim2.fromOffset(0, 22)
+	tooltip.AutomaticSize = Enum.AutomaticSize.X
+	tooltip.BackgroundColor3 = self.theme.SurfaceActive
+	tooltip.BorderSizePixel = 0
+	tooltip.Visible = false
+	tooltip.ZIndex = 35
+	tooltip.Parent = self.mainFrame
+	createCorner(tooltip, 6)
+	createStroke(tooltip, self.theme.Border, 1, 0)
+	createPadding(tooltip, 0, 0, 8, 8)
+
+	local label = Instance.new("TextLabel")
+	label.Name = "TooltipLabel"
+	label.Size = UDim2.new(0, 0, 1, 0)
+	label.AutomaticSize = Enum.AutomaticSize.X
+	label.BackgroundTransparency = 1
+	label.Text = ""
+	label.TextColor3 = self.theme.Text
+	label.TextSize = 11
+	applyFont(label, Fonts.Medium)
+	label.ZIndex = 36
+	label.Parent = tooltip
+
+	self.railTooltip = tooltip
+	self.railTooltipLabel = label
+end
+
+function GUI:_showRailTooltip(item: Frame, text: string)
+	if self._sidebarExpanded or not self.railTooltip or not self.railTooltipLabel then
+		return
+	end
+	local itemAbsY = item.AbsolutePosition.Y - self.mainFrame.AbsolutePosition.Y
+	local scale = if self.uiScale and self.uiScale.Scale > 0 then self.uiScale.Scale else 1
+	local localY = (itemAbsY / scale) + (item.Size.Y.Offset * 0.5) - 11
+	self.railTooltipLabel.Text = text
+	self.railTooltip.Position = UDim2.fromOffset(self.railCompactWidth + 2, math.floor(localY))
+	self.railTooltip.Visible = true
+end
+
+function GUI:_hideRailTooltip()
+	if self.railTooltip then
+		self.railTooltip.Visible = false
+	end
+end
+
 function GUI:_createFloatingPill()
 	self.floatingPill = Instance.new("TextButton")
 	self.floatingPill.Name = "BiarUIPill"
 	self.floatingPill.Size = UDim2.fromOffset(116, 32)
 	self.floatingPill.Position = UDim2.new(0.5, 0, 0, 18)
 	self.floatingPill.AnchorPoint = Vector2.new(0.5, 0)
-	self.floatingPill.BackgroundColor3 = self.theme.Background
+	self.floatingPill.BackgroundColor3 = self.theme.Sidebar
 	self.floatingPill.BorderSizePixel = 0
 	self.floatingPill.Text = ""
 	self.floatingPill.AutoButtonColor = false
@@ -854,117 +899,103 @@ function GUI:toggleMinimize()
 end
 
 function GUI:toggleSidebar()
-	self._sidebarCollapsed = not self._sidebarCollapsed
-	local sidebarWidth = if self._sidebarCollapsed then 0 else self.sidebarWidth
+	self._sidebarExpanded = not self._sidebarExpanded
+	self._sidebarCollapsed = not self._sidebarExpanded
+	self:_hideRailTooltip()
+
+	local targetWidth = if self._sidebarExpanded then self.railExpandedWidth else self.railCompactWidth
+	self.sidebarWidth = targetWidth
 	self.sidebar.ClipsDescendants = true
 
 	TweenService:Create(self.sidebar, SMOOTH_TWEEN, {
-		Size = UDim2.new(0, sidebarWidth, 1, -self.titleHeight),
+		Size = UDim2.new(0, targetWidth, 1, -self.titleHeight - 6),
 	}):Play()
 
 	TweenService:Create(self.contentArea, SMOOTH_TWEEN, {
-		Size = UDim2.new(1, -sidebarWidth, 1, -self.titleHeight),
-		Position = UDim2.fromOffset(sidebarWidth, self.titleHeight),
+		Size = UDim2.new(1, -targetWidth - 6, 1, -self.titleHeight - 6),
+		Position = UDim2.fromOffset(targetWidth, self.titleHeight),
 	}):Play()
+
+	for _, item in self.sidebarItems do
+		local itemButton = item:FindFirstChild("ItemButton") :: TextButton?
+		if itemButton then
+			TweenService:Create(itemButton, FAST_TWEEN, {
+				TextTransparency = if self._sidebarExpanded then 0 else 1,
+			}):Play()
+		end
+	end
 end
 
 function GUI:createSidebar()
-	local sidebarWidth = if self.isMobile then 130 else 150
+	self.railCompactWidth = if self.isMobile then 44 else 48
+	self.railExpandedWidth = if self.isMobile then 132 else 148
+	local sidebarWidth = if self._sidebarExpanded then self.railExpandedWidth else self.railCompactWidth
 	self.sidebarWidth = sidebarWidth
 	local titleHeight = self.titleHeight or (if self.isMobile then 36 else 38)
 
 	self.sidebar = Instance.new("Frame")
 	self.sidebar.Name = "Sidebar"
-	self.sidebar.Size = UDim2.new(0, sidebarWidth, 1, -titleHeight)
+	self.sidebar.Size = UDim2.new(0, sidebarWidth, 1, -titleHeight - 6)
 	self.sidebar.Position = UDim2.fromOffset(0, titleHeight)
 	self.sidebar.BackgroundColor3 = self.theme.Sidebar
+	self.sidebar.BackgroundTransparency = 1
 	self.sidebar.BorderSizePixel = 0
 	self.sidebar.ClipsDescendants = true
 	self.sidebar.Parent = self.mainFrame
-	createCorner(self.sidebar, 14)
-
-	-- Keep top-left, top-right, and bottom-right corners flush while bottom-left stays rounded (14px)
-	local topCornerMask = Instance.new("Frame")
-	topCornerMask.Name = "TopCornerMask"
-	topCornerMask.Size = UDim2.new(1, 0, 0, 14)
-	topCornerMask.Position = UDim2.fromOffset(0, 0)
-	topCornerMask.BackgroundColor3 = self.theme.Sidebar
-	topCornerMask.BorderSizePixel = 0
-	topCornerMask.ZIndex = 0
-	topCornerMask.Parent = self.sidebar
-
-	local bottomRightMask = Instance.new("Frame")
-	bottomRightMask.Name = "BottomRightMask"
-	bottomRightMask.Size = UDim2.fromOffset(14, 14)
-	bottomRightMask.Position = UDim2.new(1, -14, 1, -14)
-	bottomRightMask.BackgroundColor3 = self.theme.Sidebar
-	bottomRightMask.BorderSizePixel = 0
-	bottomRightMask.ZIndex = 0
-	bottomRightMask.Parent = self.sidebar
-
-	-- Hairline vertical divider on right edge of sidebar
-	local borderRight = Instance.new("Frame")
-	borderRight.Name = "SidebarDivider"
-	borderRight.Size = UDim2.new(0, 1, 1, 0)
-	borderRight.Position = UDim2.new(1, -1, 0, 0)
-	borderRight.BackgroundColor3 = self.theme.BorderSubtle
-	borderRight.BorderSizePixel = 0
-	borderRight.ZIndex = 2
-	borderRight.Parent = self.sidebar
-
-	local topOffset = if self.isMobile then 42 else 46
 
 	self.sidebarScrolling = Instance.new("ScrollingFrame")
 	self.sidebarScrolling.Name = "SidebarScrolling"
-	self.sidebarScrolling.Size = UDim2.new(1, -1, 1, -topOffset)
-	self.sidebarScrolling.Position = UDim2.fromOffset(0, topOffset)
+	self.sidebarScrolling.Size = UDim2.fromScale(1, 1)
+	self.sidebarScrolling.Position = UDim2.fromOffset(0, 0)
 	self.sidebarScrolling.BackgroundTransparency = 1
 	self.sidebarScrolling.BorderSizePixel = 0
-	self.sidebarScrolling.ScrollBarThickness = 2
-	self.sidebarScrolling.ScrollBarImageColor3 = self.theme.Border
+	self.sidebarScrolling.ScrollBarThickness = 0
 	self.sidebarScrolling.CanvasSize = UDim2.fromOffset(0, 0)
 	self.sidebarScrolling.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	self.sidebarScrolling.Parent = self.sidebar
 
 	local sidebarLayout = Instance.new("UIListLayout")
 	sidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	sidebarLayout.Padding = UDim.new(0, 3)
+	sidebarLayout.Padding = UDim.new(0, 4)
 	sidebarLayout.Parent = self.sidebarScrolling
 
-	createPadding(self.sidebarScrolling, 4, 8, 8, 8)
+	createPadding(self.sidebarScrolling, 2, 6, 6, 6)
 end
 
 function GUI:createSearchBar()
-	local searchHeight = if self.isMobile then 26 else 28
+	local searchWidth = if self.isCompact then 118 elseif self.isMobile then 136 else 166
+	local searchHeight = if self.isMobile then 22 else 24
 
 	self.searchFrame = Instance.new("Frame")
 	self.searchFrame.Name = "SearchFrame"
-	self.searchFrame.Size = UDim2.new(1, -16, 0, searchHeight)
-	self.searchFrame.Position = UDim2.fromOffset(8, 9)
-	self.searchFrame.BackgroundColor3 = self.theme.Surface
+	self.searchFrame.Size = UDim2.fromOffset(searchWidth, searchHeight)
+	self.searchFrame.Position = UDim2.new(1, -(searchWidth + 64), 0.5, -math.floor(searchHeight * 0.5))
+	self.searchFrame.BackgroundColor3 = self.theme.Background
 	self.searchFrame.BorderSizePixel = 0
-	self.searchFrame.Parent = self.sidebar
+	self.searchFrame.ZIndex = 6
+	self.searchFrame.Parent = self.titleBar
 
-	createCorner(self.searchFrame, 8)
+	createCorner(self.searchFrame, 7)
 	local searchStroke = createStroke(self.searchFrame, self.theme.BorderSubtle, 1, 0)
 
-	local searchIcon = self:createIcon("search", 12, self.theme.TextMuted, self.searchFrame)
+	local searchIcon = self:createIcon("search", 11, self.theme.TextMuted, self.searchFrame)
 	searchIcon.Position = UDim2.new(0, 8, 0.5, 0)
 	searchIcon.AnchorPoint = Vector2.new(0, 0.5)
 
 	self.searchBox = Instance.new("TextBox")
 	self.searchBox.Name = "SearchBox"
-	self.searchBox.Size = UDim2.new(1, -28, 1, 0)
-	self.searchBox.Position = UDim2.fromOffset(25, 0)
+	self.searchBox.Size = UDim2.new(1, -26, 1, 0)
+	self.searchBox.Position = UDim2.fromOffset(23, 0)
 	self.searchBox.BackgroundTransparency = 1
 	self.searchBox.Text = ""
 	self.searchBox.PlaceholderText = "Search..."
 	self.searchBox.TextColor3 = self.theme.Text
 	self.searchBox.PlaceholderColor3 = self.theme.TextMuted
-	self.searchBox.TextSize = if self.isMobile then 11 else 12
+	self.searchBox.TextSize = 11
 	applyFont(self.searchBox, Fonts.Regular)
 	self.searchBox.TextXAlignment = Enum.TextXAlignment.Left
 	self.searchBox.ClearTextOnFocus = false
+	self.searchBox.ZIndex = 7
 	self.searchBox.Parent = self.searchFrame
 
 	self.searchBox.Focused:Connect(function()
@@ -983,22 +1014,66 @@ function GUI:createSearchBar()
 end
 
 function GUI:createContentArea()
-	local sidebarWidth = self.sidebarWidth or (if self.isMobile then 130 else 150)
+	local sidebarWidth = self.sidebarWidth or (if self.isMobile then 44 else 48)
 	local titleHeight = self.titleHeight or (if self.isMobile then 36 else 38)
+	local headerBarH = 28
 
+	-- Recessed Inset Canvas (Concept 2: Frame-in-Frame)
 	self.contentArea = Instance.new("Frame")
 	self.contentArea.Name = "ContentArea"
-	self.contentArea.Size = UDim2.new(1, -sidebarWidth, 1, -titleHeight)
+	self.contentArea.Size = UDim2.new(1, -sidebarWidth - 6, 1, -titleHeight - 6)
 	self.contentArea.Position = UDim2.fromOffset(sidebarWidth, titleHeight)
 	self.contentArea.BackgroundColor3 = self.theme.Background
-	self.contentArea.BackgroundTransparency = 1
+	self.contentArea.BackgroundTransparency = 0
 	self.contentArea.BorderSizePixel = 0
+	self.contentArea.ClipsDescendants = true
 	self.contentArea.Parent = self.mainFrame
+
+	createCorner(self.contentArea, 11)
+	createStroke(self.contentArea, self.theme.BorderSubtle, 1, 0)
+
+	-- Inset Canvas Category Header Bar
+	self.canvasHeader = Instance.new("Frame")
+	self.canvasHeader.Name = "CanvasHeader"
+	self.canvasHeader.Size = UDim2.new(1, 0, 0, headerBarH)
+	self.canvasHeader.Position = UDim2.fromOffset(0, 0)
+	self.canvasHeader.BackgroundTransparency = 1
+	self.canvasHeader.Parent = self.contentArea
+
+	local headerDot = Instance.new("Frame")
+	headerDot.Name = "HeaderDot"
+	headerDot.Size = UDim2.fromOffset(5, 5)
+	headerDot.Position = UDim2.new(0, 12, 0.5, 0)
+	headerDot.AnchorPoint = Vector2.new(0, 0.5)
+	headerDot.BackgroundColor3 = self.theme.Accent
+	headerDot.BorderSizePixel = 0
+	headerDot.Parent = self.canvasHeader
+	createCorner(headerDot, 5)
+
+	self.canvasTitleLabel = Instance.new("TextLabel")
+	self.canvasTitleLabel.Name = "CanvasTitle"
+	self.canvasTitleLabel.Size = UDim2.new(1, -32, 1, 0)
+	self.canvasTitleLabel.Position = UDim2.fromOffset(23, 0)
+	self.canvasTitleLabel.BackgroundTransparency = 1
+	self.canvasTitleLabel.Text = "OVERVIEW"
+	self.canvasTitleLabel.TextColor3 = self.theme.TextSecondary
+	self.canvasTitleLabel.TextSize = 10
+	applyFont(self.canvasTitleLabel, Fonts.Bold)
+	self.canvasTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	self.canvasTitleLabel.Parent = self.canvasHeader
+
+	local headerDivider = Instance.new("Frame")
+	headerDivider.Name = "HeaderDivider"
+	headerDivider.Size = UDim2.new(1, 0, 0, 1)
+	headerDivider.Position = UDim2.new(0, 0, 1, -1)
+	headerDivider.BackgroundColor3 = self.theme.BorderSubtle
+	headerDivider.BorderSizePixel = 0
+	headerDivider.Parent = self.canvasHeader
 
 	self.contentScrolling = Instance.new("ScrollingFrame")
 	self.contentScrolling.Name = "ContentScrolling"
-	self.contentScrolling.Size = UDim2.fromScale(1, 1)
-	self.contentScrolling.Position = UDim2.fromOffset(0, 0)
+	self.contentScrolling.Size = UDim2.new(1, 0, 1, -headerBarH)
+	self.contentScrolling.Position = UDim2.fromOffset(0, headerBarH)
 	self.contentScrolling.BackgroundTransparency = 1
 	self.contentScrolling.BorderSizePixel = 0
 	self.contentScrolling.ScrollBarThickness = 2
@@ -1012,7 +1087,7 @@ function GUI:createContentArea()
 	contentLayout.Padding = UDim.new(0, if self.isMobile then 6 else 7)
 	contentLayout.Parent = self.contentScrolling
 
-	local pad = if self.isMobile then 10 else 12
+	local pad = if self.isMobile then 10 else 11
 	createPadding(self.contentScrolling, pad, pad, pad, pad)
 end
 
@@ -1046,8 +1121,9 @@ function GUI:saveComponentCallback(sidebarName: string?, componentId: string, ca
 end
 
 function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: string?)
-	local itemHeight = if self.isMobile then 29 else 31
+	local itemHeight = if self.isMobile then 32 else 34
 	local resolvedIcon = iconName or inferIconName(name)
+	local iconSlotCenter = math.floor(((self.railCompactWidth or 48) - 12) * 0.5)
 
 	local item = Instance.new("Frame")
 	item.Name = name
@@ -1055,13 +1131,16 @@ function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: strin
 	item.BackgroundColor3 = self.theme.SurfaceActive
 	item.BackgroundTransparency = 1
 	item.BorderSizePixel = 0
+	item.ClipsDescendants = true
 	item.Parent = self.sidebarScrolling
 
-	createCorner(item, 8)
+	createCorner(item, 9)
+	local itemStroke = createStroke(item, self.theme.BorderSubtle, 1, 1)
+	itemStroke.Name = "ItemStroke"
 
-	local iconObj = self:createIcon(resolvedIcon, 13, self.theme.TextMuted, item)
-	iconObj.Position = UDim2.new(0, 10, 0.5, 0)
-	iconObj.AnchorPoint = Vector2.new(0, 0.5)
+	local iconObj = self:createIcon(resolvedIcon, 14, self.theme.TextMuted, item)
+	iconObj.Position = UDim2.new(0, iconSlotCenter, 0.5, 0)
+	iconObj.AnchorPoint = Vector2.new(0.5, 0.5)
 
 	local itemButton = Instance.new("TextButton")
 	itemButton.Name = "ItemButton"
@@ -1070,18 +1149,19 @@ function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: strin
 	itemButton.BackgroundTransparency = 1
 	itemButton.Text = name
 	itemButton.TextColor3 = self.theme.TextSecondary
+	itemButton.TextTransparency = if self._sidebarExpanded then 0 else 1
 	itemButton.TextSize = if self.isMobile then 12 else 13
 	applyFont(itemButton, Fonts.Medium)
 	itemButton.TextXAlignment = Enum.TextXAlignment.Left
 	itemButton.TextTruncate = Enum.TextTruncate.AtEnd
 	itemButton.Parent = item
 
-	createPadding(itemButton, 0, 0, 30, 8)
+	createPadding(itemButton, 0, 0, (iconSlotCenter * 2) - 2, 8)
 
 	local highlight = Instance.new("Frame")
 	highlight.Name = "Highlight"
 	highlight.Size = UDim2.new(0, 2, 0, 12)
-	highlight.Position = UDim2.new(0, 2, 0.5, -6)
+	highlight.Position = UDim2.new(0, 1, 0.5, -6)
 	highlight.BackgroundColor3 = self.theme.Accent
 	highlight.BorderSizePixel = 0
 	highlight.Visible = false
@@ -1093,10 +1173,11 @@ function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: strin
 	end)
 
 	itemButton.MouseEnter:Connect(function()
+		self:_showRailTooltip(item, name)
 		if self.selectedItem ~= item then
 			TweenService:Create(item, FAST_TWEEN, {
 				BackgroundColor3 = self.theme.SurfaceHover,
-				BackgroundTransparency = 0.25,
+				BackgroundTransparency = 0.2,
 			}):Play()
 			TweenService:Create(itemButton, FAST_TWEEN, { TextColor3 = self.theme.Text }):Play()
 			self:tintIcon(iconObj, self.theme.TextSecondary)
@@ -1104,6 +1185,7 @@ function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: strin
 	end)
 
 	itemButton.MouseLeave:Connect(function()
+		self:_hideRailTooltip()
 		if self.selectedItem ~= item then
 			TweenService:Create(item, FAST_TWEEN, {
 				BackgroundTransparency = 1,
@@ -1133,8 +1215,12 @@ function GUI:selectSidebarItem(item: Frame, name: string, callback: (() -> ())?)
 		local prevName = self.selectedItem.Name
 		local prevHighlight = self.selectedItem:FindFirstChild("Highlight") :: Frame?
 		local prevButton = self.selectedItem:FindFirstChild("ItemButton") :: TextButton?
+		local prevStroke = self.selectedItem:FindFirstChild("ItemStroke") :: UIStroke?
 		if prevHighlight then
 			prevHighlight.Visible = false
+		end
+		if prevStroke then
+			TweenService:Create(prevStroke, FAST_TWEEN, { Transparency = 1 }):Play()
 		end
 		if prevButton then
 			applyFont(prevButton, Fonts.Medium)
@@ -1150,16 +1236,24 @@ function GUI:selectSidebarItem(item: Frame, name: string, callback: (() -> ())?)
 	self.selectedItem = item
 	self.currentSidebarName = name
 
+	if self.canvasTitleLabel then
+		self.canvasTitleLabel.Text = name:upper()
+	end
+
 	local highlight = item:FindFirstChild("Highlight") :: Frame?
 	local itemButton = item:FindFirstChild("ItemButton") :: TextButton?
+	local itemStroke = item:FindFirstChild("ItemStroke") :: UIStroke?
 	if highlight then
 		highlight.Visible = true
 		highlight.Size = UDim2.new(0, 2, 0, 4)
-		highlight.Position = UDim2.new(0, 2, 0.5, -2)
+		highlight.Position = UDim2.new(0, 1, 0.5, -2)
 		TweenService:Create(highlight, SMOOTH_TWEEN, {
 			Size = UDim2.new(0, 2, 0, 14),
-			Position = UDim2.new(0, 2, 0.5, -7),
+			Position = UDim2.new(0, 1, 0.5, -7),
 		}):Play()
+	end
+	if itemStroke then
+		TweenService:Create(itemStroke, FAST_TWEEN, { Transparency = 0 }):Play()
 	end
 	if itemButton then
 		applyFont(itemButton, Fonts.SemiBold)
@@ -1181,6 +1275,10 @@ function GUI:selectSidebarItem(item: Frame, name: string, callback: (() -> ())?)
 	local resolvedCallback = callback or self.sidebarCallbacks[name]
 	if resolvedCallback then
 		resolvedCallback()
+	end
+
+	if self.searchBox and self.searchBox.Text ~= "" then
+		self:filterSidebarItems(self.searchBox.Text)
 	end
 end
 
@@ -2565,8 +2663,46 @@ end
 
 function GUI:filterSidebarItems(searchText: string)
 	local query = searchText:lower()
+
+	-- Filter controls inside the recessed content canvas
+	if self.contentScrolling then
+		for _, child in self.contentScrolling:GetChildren() do
+			if child:IsA("GuiObject") then
+				if query == "" then
+					child.Visible = true
+				else
+					local matched = child.Name:lower():find(query, 1, true) ~= nil
+					if not matched then
+						for _, desc in child:GetDescendants() do
+							if (desc:IsA("TextLabel") or desc:IsA("TextButton")) and desc.Text:lower():find(query, 1, true) then
+								matched = true
+								break
+							end
+						end
+					end
+					child.Visible = matched
+				end
+			end
+		end
+	end
+
+	-- Also filter sidebar items if any tab name matches the query
+	local anySidebarMatch = false
+	if query ~= "" then
+		for name in self.sidebarItems do
+			if name:lower():find(query, 1, true) ~= nil then
+				anySidebarMatch = true
+				break
+			end
+		end
+	end
+
 	for name, item in self.sidebarItems do
-		item.Visible = (query == "" or name:lower():find(query, 1, true) ~= nil)
+		if query == "" or not anySidebarMatch then
+			item.Visible = true
+		else
+			item.Visible = (name:lower():find(query, 1, true) ~= nil)
+		end
 	end
 end
 
