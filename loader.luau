@@ -7,7 +7,6 @@
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-local GuiService = game:GetService("GuiService")
 
 export type ThemePalette = {
 	Background: Color3,
@@ -28,7 +27,6 @@ export type ThemePalette = {
 	TextMuted: Color3,
 	Success: Color3,
 	Danger: Color3,
-	Shadow: Color3,
 }
 
 export type GUIOptions = {
@@ -39,69 +37,67 @@ export type GUIOptions = {
 	accentColor: Color3?,
 }
 
+-- Refined Neutral Zinc / Carbon Palettes (Linear / Geist / Shadcn inspired)
 local Themes: { [string]: ThemePalette } = {
 	Dark = {
-		Background = Color3.fromRGB(13, 15, 20),
-		Sidebar = Color3.fromRGB(16, 18, 24),
-		TitleBar = Color3.fromRGB(15, 17, 23),
-		Surface = Color3.fromRGB(20, 23, 31),
-		SurfaceHover = Color3.fromRGB(25, 29, 39),
-		SurfaceActive = Color3.fromRGB(30, 35, 48),
-		Control = Color3.fromRGB(14, 16, 22),
-		ControlHover = Color3.fromRGB(22, 26, 36),
-		Border = Color3.fromRGB(36, 41, 54),
-		BorderSubtle = Color3.fromRGB(26, 30, 40),
+		Background = Color3.fromRGB(10, 10, 12),
+		Sidebar = Color3.fromRGB(13, 13, 16),
+		TitleBar = Color3.fromRGB(10, 10, 12),
+		Surface = Color3.fromRGB(17, 17, 21),
+		SurfaceHover = Color3.fromRGB(22, 22, 27),
+		SurfaceActive = Color3.fromRGB(26, 26, 33),
+		Control = Color3.fromRGB(23, 23, 28),
+		ControlHover = Color3.fromRGB(31, 31, 38),
+		Border = Color3.fromRGB(42, 42, 50),
+		BorderSubtle = Color3.fromRGB(28, 28, 34),
 		Accent = Color3.fromRGB(99, 102, 241),
 		AccentHover = Color3.fromRGB(129, 140, 248),
-		AccentSoft = Color3.fromRGB(32, 36, 68),
-		Text = Color3.fromRGB(243, 244, 246),
-		TextSecondary = Color3.fromRGB(156, 163, 175),
-		TextMuted = Color3.fromRGB(107, 114, 128),
+		AccentSoft = Color3.fromRGB(28, 29, 54),
+		Text = Color3.fromRGB(244, 244, 246),
+		TextSecondary = Color3.fromRGB(161, 161, 170),
+		TextMuted = Color3.fromRGB(113, 113, 122),
 		Success = Color3.fromRGB(16, 185, 129),
 		Danger = Color3.fromRGB(239, 68, 68),
-		Shadow = Color3.fromRGB(0, 0, 0),
 	},
 	Midnight = {
-		Background = Color3.fromRGB(9, 10, 15),
-		Sidebar = Color3.fromRGB(12, 14, 20),
-		TitleBar = Color3.fromRGB(11, 13, 19),
-		Surface = Color3.fromRGB(16, 19, 27),
-		SurfaceHover = Color3.fromRGB(22, 26, 37),
-		SurfaceActive = Color3.fromRGB(28, 33, 46),
-		Control = Color3.fromRGB(11, 13, 18),
-		ControlHover = Color3.fromRGB(18, 22, 31),
-		Border = Color3.fromRGB(30, 36, 48),
-		BorderSubtle = Color3.fromRGB(22, 26, 36),
+		Background = Color3.fromRGB(8, 9, 12),
+		Sidebar = Color3.fromRGB(11, 12, 16),
+		TitleBar = Color3.fromRGB(8, 9, 12),
+		Surface = Color3.fromRGB(15, 16, 22),
+		SurfaceHover = Color3.fromRGB(20, 22, 30),
+		SurfaceActive = Color3.fromRGB(25, 28, 38),
+		Control = Color3.fromRGB(20, 22, 30),
+		ControlHover = Color3.fromRGB(28, 31, 42),
+		Border = Color3.fromRGB(38, 42, 56),
+		BorderSubtle = Color3.fromRGB(25, 28, 38),
 		Accent = Color3.fromRGB(59, 130, 246),
 		AccentHover = Color3.fromRGB(96, 165, 250),
-		AccentSoft = Color3.fromRGB(23, 37, 68),
+		AccentSoft = Color3.fromRGB(21, 34, 62),
 		Text = Color3.fromRGB(248, 250, 252),
 		TextSecondary = Color3.fromRGB(148, 163, 184),
 		TextMuted = Color3.fromRGB(100, 116, 139),
 		Success = Color3.fromRGB(34, 197, 94),
 		Danger = Color3.fromRGB(244, 63, 94),
-		Shadow = Color3.fromRGB(0, 0, 0),
 	},
 	Light = {
-		Background = Color3.fromRGB(249, 250, 251),
-		Sidebar = Color3.fromRGB(243, 244, 246),
-		TitleBar = Color3.fromRGB(245, 246, 248),
+		Background = Color3.fromRGB(250, 250, 250),
+		Sidebar = Color3.fromRGB(244, 244, 245),
+		TitleBar = Color3.fromRGB(250, 250, 250),
 		Surface = Color3.fromRGB(255, 255, 255),
-		SurfaceHover = Color3.fromRGB(243, 244, 246),
-		SurfaceActive = Color3.fromRGB(229, 231, 235),
-		Control = Color3.fromRGB(243, 244, 246),
-		ControlHover = Color3.fromRGB(229, 231, 235),
-		Border = Color3.fromRGB(219, 223, 230),
-		BorderSubtle = Color3.fromRGB(229, 231, 235),
+		SurfaceHover = Color3.fromRGB(244, 244, 245),
+		SurfaceActive = Color3.fromRGB(228, 228, 231),
+		Control = Color3.fromRGB(244, 244, 245),
+		ControlHover = Color3.fromRGB(228, 228, 231),
+		Border = Color3.fromRGB(212, 212, 216),
+		BorderSubtle = Color3.fromRGB(228, 228, 231),
 		Accent = Color3.fromRGB(79, 70, 229),
 		AccentHover = Color3.fromRGB(99, 102, 241),
 		AccentSoft = Color3.fromRGB(224, 231, 255),
-		Text = Color3.fromRGB(17, 24, 39),
-		TextSecondary = Color3.fromRGB(75, 85, 99),
-		TextMuted = Color3.fromRGB(156, 163, 175),
+		Text = Color3.fromRGB(24, 24, 27),
+		TextSecondary = Color3.fromRGB(82, 82, 91),
+		TextMuted = Color3.fromRGB(161, 161, 170),
 		Success = Color3.fromRGB(5, 150, 105),
 		Danger = Color3.fromRGB(220, 38, 38),
-		Shadow = Color3.fromRGB(15, 23, 42),
 	},
 }
 
@@ -109,9 +105,29 @@ local GUI = {}
 GUI.__index = GUI
 GUI.Themes = Themes
 
-local FAST_TWEEN = TweenInfo.new(0.16, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-local SMOOTH_TWEEN = TweenInfo.new(0.24, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+-- Ultra-smooth Exponential & Quint easing curves
+local INSTANT_TWEEN = TweenInfo.new(0.06, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+local FAST_TWEEN = TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+local SMOOTH_TWEEN = TweenInfo.new(0.28, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
 local SPRING_TWEEN = TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+-- Modern geometric sans typography (BuilderSans / Inter style)
+local FONT_FAMILY = "rbxasset://fonts/families/BuilderSans.json"
+local Fonts = {
+	Regular = Font.new(FONT_FAMILY, Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+	Medium = Font.new(FONT_FAMILY, Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+	SemiBold = Font.new(FONT_FAMILY, Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
+	Bold = Font.new(FONT_FAMILY, Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+}
+
+local function applyFont(label: TextLabel | TextButton | TextBox, fontFace: Font)
+	local ok = pcall(function()
+		label.FontFace = fontFace
+	end)
+	if not ok then
+		label.Font = Enum.Font.GothamMedium
+	end
+end
 
 local function getParentContainer(): Instance
 	local success, coreGui = pcall(function()
@@ -196,10 +212,6 @@ local function inferIconName(label: string): string
 	return "grid"
 end
 
---[[
-	Creates a crisp, resolution-independent vector icon using Roblox UI primitives,
-	or an ImageLabel if an rbxassetid:// is provided.
-]]
 function GUI:createIcon(iconName: string?, size: number?, color: Color3?, parent: Instance?): GuiObject
 	local iconSize = size or 14
 	local iconColor = color or self.theme.TextSecondary
@@ -227,7 +239,7 @@ function GUI:createIcon(iconName: string?, size: number?, color: Color3?, parent
 		container.Parent = parent
 	end
 
-	local strokeWidth = math.max(1.5, math.floor(iconSize * 0.11 * 2) / 2)
+	local strokeWidth = math.max(1.4, math.floor(iconSize * 0.11 * 2) / 2)
 
 	if kind == "search" then
 		local lensSize = math.floor(iconSize * 0.68)
@@ -248,14 +260,14 @@ function GUI:createIcon(iconName: string?, size: number?, color: Color3?, parent
 			45
 		)
 	elseif kind == "close" or kind == "x" then
-		local barLen = math.floor(iconSize * 0.78)
+		local barLen = math.floor(iconSize * 0.76)
 		createBar(container, UDim2.fromOffset(barLen, strokeWidth), UDim2.fromScale(0.5, 0.5), iconColor, 45)
 		createBar(container, UDim2.fromOffset(barLen, strokeWidth), UDim2.fromScale(0.5, 0.5), iconColor, -45)
 	elseif kind == "minimize" or kind == "minus" then
-		local barLen = math.floor(iconSize * 0.68)
+		local barLen = math.floor(iconSize * 0.66)
 		createBar(container, UDim2.fromOffset(barLen, strokeWidth), UDim2.fromScale(0.5, 0.5), iconColor, 0)
 	elseif kind == "plus" or kind == "add" then
-		local barLen = math.floor(iconSize * 0.68)
+		local barLen = math.floor(iconSize * 0.66)
 		createBar(container, UDim2.fromOffset(barLen, strokeWidth), UDim2.fromScale(0.5, 0.5), iconColor, 0)
 		createBar(container, UDim2.fromOffset(strokeWidth, barLen), UDim2.fromScale(0.5, 0.5), iconColor, 0)
 	elseif kind == "chevron-down" or kind == "chevron-up" then
@@ -490,6 +502,7 @@ function GUI.new(title: string?, options: GUIOptions?)
 	self.mainFrame.BackgroundColor3 = self.theme.Background
 	self.mainFrame.BorderSizePixel = 0
 	self.mainFrame.ClipsDescendants = true
+	self.mainFrame.ZIndex = 2
 	self.mainFrame.Parent = self.screenGui
 
 	self.uiScale = Instance.new("UIScale")
@@ -497,26 +510,7 @@ function GUI.new(title: string?, options: GUIOptions?)
 	self.uiScale.Parent = self.mainFrame
 
 	createCorner(self.mainFrame, 10)
-	self.mainStroke = createStroke(self.mainFrame, self.theme.Border, 1, 0.15)
-
-	-- Ambient shadow behind mainFrame (rendered in screenGui so ClipsDescendants doesn't clip it)
-	self.shadowFrame = Instance.new("Frame")
-	self.shadowFrame.Name = "WindowShadow"
-	self.shadowFrame.Size = UDim2.fromOffset(baseWidth + 16, baseHeight + 16)
-	self.shadowFrame.Position = self.mainFrame.Position
-	self.shadowFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-	self.shadowFrame.BackgroundColor3 = self.theme.Shadow
-	self.shadowFrame.BackgroundTransparency = 0.65
-	self.shadowFrame.BorderSizePixel = 0
-	self.shadowFrame.ZIndex = 0
-	self.shadowFrame.Parent = self.screenGui
-	createCorner(self.shadowFrame, 14)
-
-	self.shadowScale = Instance.new("UIScale")
-	self.shadowScale.Scale = 1
-	self.shadowScale.Parent = self.shadowFrame
-
-	self.mainFrame.ZIndex = 2
+	self.mainStroke = createStroke(self.mainFrame, self.theme.Border, 1, 0)
 
 	self:createTitleBar(self.titleText)
 	self:createSidebar()
@@ -549,7 +543,7 @@ function GUI:_computeWindowMetrics(customSize: { number }?): (number, number)
 	elseif self.isMobile then
 		return 480, 320
 	else
-		return 560, 370
+		return 550, 360
 	end
 end
 
@@ -562,7 +556,6 @@ function GUI:_updateResponsiveLayout()
 	local vp = self.screenSize
 	local targetW, targetH = self.baseSize.X, self.baseSize.Y
 
-	-- Calculate adaptive scale so UI always fits comfortably inside any device screen
 	local maxW = math.max(260, vp.X - 24)
 	local maxH = math.max(200, vp.Y - 28)
 	local scaleX = maxW / targetW
@@ -572,11 +565,7 @@ function GUI:_updateResponsiveLayout()
 	if self.uiScale then
 		self.uiScale.Scale = scale
 	end
-	if self.shadowScale then
-		self.shadowScale.Scale = scale
-	end
 
-	-- Clamp window position inside viewport bounds
 	local absW = targetW * scale
 	local absH = targetH * scale
 	local centerX = (vp.X * self.mainFrame.Position.X.Scale) + self.mainFrame.Position.X.Offset
@@ -587,11 +576,7 @@ function GUI:_updateResponsiveLayout()
 	local clampedX = math.clamp(centerX, halfW + 8, math.max(halfW + 8, vp.X - halfW - 8))
 	local clampedY = math.clamp(centerY, halfH + 8, math.max(halfH + 8, vp.Y - halfH - 8))
 
-	local newPos = UDim2.new(0, clampedX, 0, clampedY)
-	self.mainFrame.Position = newPos
-	if self.shadowFrame then
-		self.shadowFrame.Position = UDim2.new(0, clampedX, 0, clampedY + 3)
-	end
+	self.mainFrame.Position = UDim2.fromOffset(clampedX, clampedY)
 end
 
 function GUI:_setupResponsiveListeners()
@@ -620,7 +605,7 @@ function GUI:_setupResponsiveListeners()
 end
 
 function GUI:createTitleBar(title: string)
-	local titleHeight = if self.isMobile then 36 else 40
+	local titleHeight = if self.isMobile then 36 else 38
 	self.titleHeight = titleHeight
 
 	self.titleBar = Instance.new("Frame")
@@ -632,7 +617,7 @@ function GUI:createTitleBar(title: string)
 	self.titleBar.ZIndex = 5
 	self.titleBar.Parent = self.mainFrame
 
-	-- Hairline bottom border
+	-- Razor-thin bottom hairline divider
 	local divider = Instance.new("Frame")
 	divider.Name = "Divider"
 	divider.Size = UDim2.new(1, 0, 0, 1)
@@ -644,9 +629,9 @@ function GUI:createTitleBar(title: string)
 	-- Sidebar toggle button
 	self.sidebarToggleBtn = Instance.new("TextButton")
 	self.sidebarToggleBtn.Name = "SidebarToggle"
-	self.sidebarToggleBtn.Size = UDim2.fromOffset(26, 26)
-	self.sidebarToggleBtn.Position = UDim2.new(0, 8, 0.5, -13)
-	self.sidebarToggleBtn.BackgroundColor3 = self.theme.Surface
+	self.sidebarToggleBtn.Size = UDim2.fromOffset(24, 24)
+	self.sidebarToggleBtn.Position = UDim2.new(0, 10, 0.5, -12)
+	self.sidebarToggleBtn.BackgroundColor3 = self.theme.SurfaceHover
 	self.sidebarToggleBtn.BackgroundTransparency = 1
 	self.sidebarToggleBtn.BorderSizePixel = 0
 	self.sidebarToggleBtn.Text = ""
@@ -654,7 +639,7 @@ function GUI:createTitleBar(title: string)
 	self.sidebarToggleBtn.Parent = self.titleBar
 	createCorner(self.sidebarToggleBtn, 6)
 
-	local sidebarIcon = self:createIcon("sidebar", 14, self.theme.TextSecondary, self.sidebarToggleBtn)
+	local sidebarIcon = self:createIcon("sidebar", 13, self.theme.TextSecondary, self.sidebarToggleBtn)
 	sidebarIcon.Position = UDim2.fromScale(0.5, 0.5)
 	sidebarIcon.AnchorPoint = Vector2.new(0.5, 0.5)
 
@@ -670,26 +655,25 @@ function GUI:createTitleBar(title: string)
 		self:toggleSidebar()
 	end)
 
-	-- Brand accent indicator dot
-	local accentDot = Instance.new("Frame")
-	accentDot.Name = "AccentDot"
-	accentDot.Size = UDim2.fromOffset(6, 6)
-	accentDot.Position = UDim2.new(0, 40, 0.5, -3)
-	accentDot.BackgroundColor3 = self.theme.Accent
-	accentDot.BorderSizePixel = 0
-	accentDot.Parent = self.titleBar
-	createCorner(accentDot, 6)
+	-- Subtle vertical separator
+	local sep = Instance.new("Frame")
+	sep.Name = "HeaderSep"
+	sep.Size = UDim2.fromOffset(1, 12)
+	sep.Position = UDim2.new(0, 41, 0.5, -6)
+	sep.BackgroundColor3 = self.theme.BorderSubtle
+	sep.BorderSizePixel = 0
+	sep.Parent = self.titleBar
 
 	-- Title label
 	local titleLabel = Instance.new("TextLabel")
 	titleLabel.Name = "TitleLabel"
-	titleLabel.Size = UDim2.new(1, -130, 1, 0)
-	titleLabel.Position = UDim2.fromOffset(52, 0)
+	titleLabel.Size = UDim2.new(1, -124, 1, 0)
+	titleLabel.Position = UDim2.fromOffset(50, 0)
 	titleLabel.BackgroundTransparency = 1
 	titleLabel.Text = title
 	titleLabel.TextColor3 = self.theme.Text
 	titleLabel.TextSize = if self.isMobile then 13 else 14
-	titleLabel.Font = Enum.Font.GothamBold
+	applyFont(titleLabel, Fonts.SemiBold)
 	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 	titleLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	titleLabel.Parent = self.titleBar
@@ -698,8 +682,8 @@ function GUI:createTitleBar(title: string)
 	-- Minimize button
 	self.minimizeButton = Instance.new("TextButton")
 	self.minimizeButton.Name = "MinimizeButton"
-	self.minimizeButton.Size = UDim2.fromOffset(26, 26)
-	self.minimizeButton.Position = UDim2.new(1, -64, 0.5, -13)
+	self.minimizeButton.Size = UDim2.fromOffset(24, 24)
+	self.minimizeButton.Position = UDim2.new(1, -60, 0.5, -12)
 	self.minimizeButton.BackgroundColor3 = self.theme.SurfaceHover
 	self.minimizeButton.BackgroundTransparency = 1
 	self.minimizeButton.BorderSizePixel = 0
@@ -708,7 +692,7 @@ function GUI:createTitleBar(title: string)
 	self.minimizeButton.Parent = self.titleBar
 	createCorner(self.minimizeButton, 6)
 
-	local minIcon = self:createIcon("minimize", 12, self.theme.TextSecondary, self.minimizeButton)
+	local minIcon = self:createIcon("minimize", 11, self.theme.TextSecondary, self.minimizeButton)
 	minIcon.Position = UDim2.fromScale(0.5, 0.5)
 	minIcon.AnchorPoint = Vector2.new(0.5, 0.5)
 
@@ -727,8 +711,8 @@ function GUI:createTitleBar(title: string)
 	-- Close button
 	self.closeButton = Instance.new("TextButton")
 	self.closeButton.Name = "CloseButton"
-	self.closeButton.Size = UDim2.fromOffset(26, 26)
-	self.closeButton.Position = UDim2.new(1, -34, 0.5, -13)
+	self.closeButton.Size = UDim2.fromOffset(24, 24)
+	self.closeButton.Position = UDim2.new(1, -32, 0.5, -12)
 	self.closeButton.BackgroundColor3 = self.theme.Danger
 	self.closeButton.BackgroundTransparency = 1
 	self.closeButton.BorderSizePixel = 0
@@ -737,12 +721,12 @@ function GUI:createTitleBar(title: string)
 	self.closeButton.Parent = self.titleBar
 	createCorner(self.closeButton, 6)
 
-	local closeIcon = self:createIcon("close", 12, self.theme.TextSecondary, self.closeButton)
+	local closeIcon = self:createIcon("close", 11, self.theme.TextSecondary, self.closeButton)
 	closeIcon.Position = UDim2.fromScale(0.5, 0.5)
 	closeIcon.AnchorPoint = Vector2.new(0.5, 0.5)
 
 	self.closeButton.MouseEnter:Connect(function()
-		TweenService:Create(self.closeButton, FAST_TWEEN, { BackgroundTransparency = 0.1 }):Play()
+		TweenService:Create(self.closeButton, FAST_TWEEN, { BackgroundTransparency = 0.12 }):Play()
 		self:tintIcon(closeIcon, Color3.fromRGB(255, 255, 255))
 	end)
 	self.closeButton.MouseLeave:Connect(function()
@@ -757,41 +741,41 @@ end
 function GUI:_createFloatingPill()
 	self.floatingPill = Instance.new("TextButton")
 	self.floatingPill.Name = "BiarUIPill"
-	self.floatingPill.Size = UDim2.fromOffset(116, 34)
+	self.floatingPill.Size = UDim2.fromOffset(116, 32)
 	self.floatingPill.Position = UDim2.new(0.5, 0, 0, 18)
 	self.floatingPill.AnchorPoint = Vector2.new(0.5, 0)
-	self.floatingPill.BackgroundColor3 = self.theme.TitleBar
+	self.floatingPill.BackgroundColor3 = self.theme.Background
 	self.floatingPill.BorderSizePixel = 0
 	self.floatingPill.Text = ""
 	self.floatingPill.AutoButtonColor = false
 	self.floatingPill.Visible = false
 	self.floatingPill.ZIndex = 50
 	self.floatingPill.Parent = self.screenGui
-	createCorner(self.floatingPill, 17)
-	createStroke(self.floatingPill, self.theme.Border, 1, 0.1)
+	createCorner(self.floatingPill, 16)
+	createStroke(self.floatingPill, self.theme.Border, 1, 0)
 
 	local dot = Instance.new("Frame")
-	dot.Size = UDim2.fromOffset(7, 7)
-	dot.Position = UDim2.new(0, 13, 0.5, -3.5)
+	dot.Size = UDim2.fromOffset(6, 6)
+	dot.Position = UDim2.new(0, 13, 0.5, -3)
 	dot.BackgroundColor3 = self.theme.Accent
 	dot.BorderSizePixel = 0
 	dot.Parent = self.floatingPill
-	createCorner(dot, 7)
+	createCorner(dot, 6)
 
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.new(1, -44, 1, 0)
-	label.Position = UDim2.fromOffset(26, 0)
+	label.Position = UDim2.fromOffset(25, 0)
 	label.BackgroundTransparency = 1
 	label.Text = self.titleText
 	label.TextColor3 = self.theme.Text
 	label.TextSize = 12
-	label.Font = Enum.Font.GothamBold
+	applyFont(label, Fonts.SemiBold)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.TextTruncate = Enum.TextTruncate.AtEnd
 	label.Parent = self.floatingPill
 
-	local chevron = self:createIcon("chevron-down", 12, self.theme.TextSecondary, self.floatingPill)
-	chevron.Position = UDim2.new(1, -18, 0.5, 0)
+	local chevron = self:createIcon("chevron-down", 11, self.theme.TextSecondary, self.floatingPill)
+	chevron.Position = UDim2.new(1, -16, 0.5, 0)
 	chevron.AnchorPoint = Vector2.new(0.5, 0.5)
 
 	local pillDragging = false
@@ -828,7 +812,9 @@ function GUI:_createFloatingPill()
 					local rawY = (vp.Y * pillStartPos.Y.Scale) + pillStartPos.Y.Offset + delta.Y
 					local clampedX = math.clamp(rawX, 64, math.max(64, vp.X - 64))
 					local clampedY = math.clamp(rawY, 12, math.max(12, vp.Y - 46))
-					self.floatingPill.Position = UDim2.fromOffset(clampedX, clampedY)
+					TweenService:Create(self.floatingPill, INSTANT_TWEEN, {
+						Position = UDim2.fromOffset(clampedX, clampedY),
+					}):Play()
 				end
 			end
 		end)
@@ -858,17 +844,11 @@ function GUI:toggleMinimize()
 	if self._minimized then
 		self.floatingPill.Visible = true
 		self.floatingPill.BackgroundTransparency = 1
-		TweenService:Create(self.floatingPill, FAST_TWEEN, { BackgroundTransparency = 0.05 }):Play()
+		TweenService:Create(self.floatingPill, FAST_TWEEN, { BackgroundTransparency = 0 }):Play()
 		self.mainFrame.Visible = false
-		if self.shadowFrame then
-			self.shadowFrame.Visible = false
-		end
 	else
 		self.floatingPill.Visible = false
 		self.mainFrame.Visible = true
-		if self.shadowFrame then
-			self.shadowFrame.Visible = true
-		end
 	end
 end
 
@@ -888,9 +868,9 @@ function GUI:toggleSidebar()
 end
 
 function GUI:createSidebar()
-	local sidebarWidth = if self.isMobile then 132 else 156
+	local sidebarWidth = if self.isMobile then 130 else 150
 	self.sidebarWidth = sidebarWidth
-	local titleHeight = self.titleHeight or (if self.isMobile then 36 else 40)
+	local titleHeight = self.titleHeight or (if self.isMobile then 36 else 38)
 
 	self.sidebar = Instance.new("Frame")
 	self.sidebar.Name = "Sidebar"
@@ -926,7 +906,7 @@ function GUI:createSidebar()
 
 	local sidebarLayout = Instance.new("UIListLayout")
 	sidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	sidebarLayout.Padding = UDim.new(0, 4)
+	sidebarLayout.Padding = UDim.new(0, 3)
 	sidebarLayout.Parent = self.sidebarScrolling
 
 	createPadding(self.sidebarScrolling, 4, 8, 8, 8)
@@ -938,13 +918,13 @@ function GUI:createSearchBar()
 	self.searchFrame = Instance.new("Frame")
 	self.searchFrame.Name = "SearchFrame"
 	self.searchFrame.Size = UDim2.new(1, -16, 0, searchHeight)
-	self.searchFrame.Position = UDim2.fromOffset(8, 8)
-	self.searchFrame.BackgroundColor3 = self.theme.Control
+	self.searchFrame.Position = UDim2.fromOffset(8, 9)
+	self.searchFrame.BackgroundColor3 = self.theme.Surface
 	self.searchFrame.BorderSizePixel = 0
 	self.searchFrame.Parent = self.sidebar
 
 	createCorner(self.searchFrame, 6)
-	local searchStroke = createStroke(self.searchFrame, self.theme.BorderSubtle, 1, 0.2)
+	local searchStroke = createStroke(self.searchFrame, self.theme.BorderSubtle, 1, 0)
 
 	local searchIcon = self:createIcon("search", 12, self.theme.TextMuted, self.searchFrame)
 	searchIcon.Position = UDim2.new(0, 8, 0.5, 0)
@@ -960,18 +940,18 @@ function GUI:createSearchBar()
 	self.searchBox.TextColor3 = self.theme.Text
 	self.searchBox.PlaceholderColor3 = self.theme.TextMuted
 	self.searchBox.TextSize = if self.isMobile then 11 else 12
-	self.searchBox.Font = Enum.Font.Gotham
+	applyFont(self.searchBox, Fonts.Regular)
 	self.searchBox.TextXAlignment = Enum.TextXAlignment.Left
 	self.searchBox.ClearTextOnFocus = false
 	self.searchBox.Parent = self.searchFrame
 
 	self.searchBox.Focused:Connect(function()
-		TweenService:Create(searchStroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0 }):Play()
-		self:tintIcon(searchIcon, self.theme.Accent)
+		TweenService:Create(searchStroke, FAST_TWEEN, { Color = self.theme.Border }):Play()
+		self:tintIcon(searchIcon, self.theme.Text)
 	end)
 
 	self.searchBox.FocusLost:Connect(function()
-		TweenService:Create(searchStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.2 }):Play()
+		TweenService:Create(searchStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
 		self:tintIcon(searchIcon, self.theme.TextMuted)
 	end)
 
@@ -981,8 +961,8 @@ function GUI:createSearchBar()
 end
 
 function GUI:createContentArea()
-	local sidebarWidth = self.sidebarWidth or (if self.isMobile then 132 else 156)
-	local titleHeight = self.titleHeight or (if self.isMobile then 36 else 40)
+	local sidebarWidth = self.sidebarWidth or (if self.isMobile then 130 else 150)
+	local titleHeight = self.titleHeight or (if self.isMobile then 36 else 38)
 
 	self.contentArea = Instance.new("Frame")
 	self.contentArea.Name = "ContentArea"
@@ -998,7 +978,7 @@ function GUI:createContentArea()
 	self.contentScrolling.Position = UDim2.fromOffset(0, 0)
 	self.contentScrolling.BackgroundTransparency = 1
 	self.contentScrolling.BorderSizePixel = 0
-	self.contentScrolling.ScrollBarThickness = if self.isMobile then 2 else 3
+	self.contentScrolling.ScrollBarThickness = 2
 	self.contentScrolling.ScrollBarImageColor3 = self.theme.Border
 	self.contentScrolling.CanvasSize = UDim2.fromOffset(0, 0)
 	self.contentScrolling.AutomaticCanvasSize = Enum.AutomaticSize.Y
@@ -1006,10 +986,10 @@ function GUI:createContentArea()
 
 	local contentLayout = Instance.new("UIListLayout")
 	contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	contentLayout.Padding = UDim.new(0, if self.isMobile then 6 else 8)
+	contentLayout.Padding = UDim.new(0, if self.isMobile then 6 else 7)
 	contentLayout.Parent = self.contentScrolling
 
-	local pad = if self.isMobile then 10 else 14
+	local pad = if self.isMobile then 10 else 12
 	createPadding(self.contentScrolling, pad, pad, pad, pad)
 end
 
@@ -1043,20 +1023,20 @@ function GUI:saveComponentCallback(sidebarName: string?, componentId: string, ca
 end
 
 function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: string?)
-	local itemHeight = if self.isMobile then 30 else 32
+	local itemHeight = if self.isMobile then 29 else 31
 	local resolvedIcon = iconName or inferIconName(name)
 
 	local item = Instance.new("Frame")
 	item.Name = name
 	item.Size = UDim2.new(1, 0, 0, itemHeight)
-	item.BackgroundColor3 = self.theme.Surface
+	item.BackgroundColor3 = self.theme.SurfaceActive
 	item.BackgroundTransparency = 1
 	item.BorderSizePixel = 0
 	item.Parent = self.sidebarScrolling
 
 	createCorner(item, 6)
 
-	local iconObj = self:createIcon(resolvedIcon, 14, self.theme.TextSecondary, item)
+	local iconObj = self:createIcon(resolvedIcon, 13, self.theme.TextMuted, item)
 	iconObj.Position = UDim2.new(0, 10, 0.5, 0)
 	iconObj.AnchorPoint = Vector2.new(0, 0.5)
 
@@ -1067,18 +1047,18 @@ function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: strin
 	itemButton.BackgroundTransparency = 1
 	itemButton.Text = name
 	itemButton.TextColor3 = self.theme.TextSecondary
-	itemButton.TextSize = if self.isMobile then 11 else 12
-	itemButton.Font = Enum.Font.GothamMedium
+	itemButton.TextSize = if self.isMobile then 12 else 13
+	applyFont(itemButton, Fonts.Medium)
 	itemButton.TextXAlignment = Enum.TextXAlignment.Left
 	itemButton.TextTruncate = Enum.TextTruncate.AtEnd
 	itemButton.Parent = item
 
-	createPadding(itemButton, 0, 0, 32, 8)
+	createPadding(itemButton, 0, 0, 30, 8)
 
 	local highlight = Instance.new("Frame")
 	highlight.Name = "Highlight"
-	highlight.Size = UDim2.new(0, 3, 0, 14)
-	highlight.Position = UDim2.new(0, 0, 0.5, -7)
+	highlight.Size = UDim2.new(0, 2, 0, 12)
+	highlight.Position = UDim2.new(0, 2, 0.5, -6)
 	highlight.BackgroundColor3 = self.theme.Accent
 	highlight.BorderSizePixel = 0
 	highlight.Visible = false
@@ -1093,10 +1073,10 @@ function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: strin
 		if self.selectedItem ~= item then
 			TweenService:Create(item, FAST_TWEEN, {
 				BackgroundColor3 = self.theme.SurfaceHover,
-				BackgroundTransparency = 0.35,
+				BackgroundTransparency = 0.25,
 			}):Play()
 			TweenService:Create(itemButton, FAST_TWEEN, { TextColor3 = self.theme.Text }):Play()
-			self:tintIcon(iconObj, self.theme.Text)
+			self:tintIcon(iconObj, self.theme.TextSecondary)
 		end
 	end)
 
@@ -1106,7 +1086,7 @@ function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: strin
 				BackgroundTransparency = 1,
 			}):Play()
 			TweenService:Create(itemButton, FAST_TWEEN, { TextColor3 = self.theme.TextSecondary }):Play()
-			self:tintIcon(iconObj, self.theme.TextSecondary)
+			self:tintIcon(iconObj, self.theme.TextMuted)
 		end
 	end)
 
@@ -1118,7 +1098,6 @@ function GUI:addSidebarItem(name: string, callback: (() -> ())?, iconName: strin
 		self.componentStates[name] = {}
 	end
 
-	-- Auto-select the first sidebar item if nothing is selected yet
 	if not self.selectedItem then
 		self:selectSidebarItem(item, name, callback)
 	end
@@ -1135,12 +1114,12 @@ function GUI:selectSidebarItem(item: Frame, name: string, callback: (() -> ())?)
 			prevHighlight.Visible = false
 		end
 		if prevButton then
-			prevButton.Font = Enum.Font.GothamMedium
+			applyFont(prevButton, Fonts.Medium)
 			TweenService:Create(prevButton, FAST_TWEEN, { TextColor3 = self.theme.TextSecondary }):Play()
 		end
 		local prevIcon = self.sidebarIcons[prevName]
 		if prevIcon then
-			self:tintIcon(prevIcon, self.theme.TextSecondary)
+			self:tintIcon(prevIcon, self.theme.TextMuted)
 		end
 		TweenService:Create(self.selectedItem, FAST_TWEEN, { BackgroundTransparency = 1 }):Play()
 	end
@@ -1152,9 +1131,15 @@ function GUI:selectSidebarItem(item: Frame, name: string, callback: (() -> ())?)
 	local itemButton = item:FindFirstChild("ItemButton") :: TextButton?
 	if highlight then
 		highlight.Visible = true
+		highlight.Size = UDim2.new(0, 2, 0, 4)
+		highlight.Position = UDim2.new(0, 2, 0.5, -2)
+		TweenService:Create(highlight, SMOOTH_TWEEN, {
+			Size = UDim2.new(0, 2, 0, 14),
+			Position = UDim2.new(0, 2, 0.5, -7),
+		}):Play()
 	end
 	if itemButton then
-		itemButton.Font = Enum.Font.GothamBold
+		applyFont(itemButton, Fonts.SemiBold)
 		TweenService:Create(itemButton, FAST_TWEEN, { TextColor3 = self.theme.Text }):Play()
 	end
 
@@ -1185,6 +1170,10 @@ function GUI:clearContent()
 	table.clear(self._contentConnections)
 	self._layoutOrder = 0
 
+	if self.contentScrolling then
+		self.contentScrolling.ScrollingEnabled = true
+	end
+
 	for _, child in self.contentScrolling:GetChildren() do
 		if child:IsA("GuiObject") then
 			child:Destroy()
@@ -1195,7 +1184,7 @@ end
 function GUI:addSection(title: string)
 	local sectionFrame = Instance.new("Frame")
 	sectionFrame.Name = `{title}Section`
-	sectionFrame.Size = UDim2.new(1, 0, 0, 22)
+	sectionFrame.Size = UDim2.new(1, 0, 0, 20)
 	sectionFrame.BackgroundTransparency = 1
 	sectionFrame.LayoutOrder = self:_nextOrder()
 	sectionFrame.Parent = self.contentScrolling
@@ -1203,12 +1192,12 @@ function GUI:addSection(title: string)
 	local sectionLabel = Instance.new("TextLabel")
 	sectionLabel.Name = "SectionLabel"
 	sectionLabel.Size = UDim2.new(1, -8, 1, 0)
-	sectionLabel.Position = UDim2.fromOffset(4, 2)
+	sectionLabel.Position = UDim2.fromOffset(2, 2)
 	sectionLabel.BackgroundTransparency = 1
 	sectionLabel.Text = title:upper()
 	sectionLabel.TextColor3 = self.theme.TextMuted
 	sectionLabel.TextSize = 10
-	sectionLabel.Font = Enum.Font.GothamBold
+	applyFont(sectionLabel, Fonts.Bold)
 	sectionLabel.TextXAlignment = Enum.TextXAlignment.Left
 	sectionLabel.Parent = sectionFrame
 
@@ -1223,22 +1212,22 @@ function GUI:addLabel(text: string)
 	labelFrame.BorderSizePixel = 0
 	labelFrame.LayoutOrder = self:_nextOrder()
 	labelFrame.Parent = self.contentScrolling
-	createCorner(labelFrame, 8)
-	createStroke(labelFrame, self.theme.BorderSubtle, 1, 0.25)
+	createCorner(labelFrame, 7)
+	createStroke(labelFrame, self.theme.BorderSubtle, 1, 0)
 
-	local icon = self:createIcon("info", 13, self.theme.Accent, labelFrame)
+	local icon = self:createIcon("info", 13, self.theme.TextSecondary, labelFrame)
 	icon.Position = UDim2.new(0, 12, 0.5, 0)
 	icon.AnchorPoint = Vector2.new(0, 0.5)
 
 	local label = Instance.new("TextLabel")
 	label.Name = "TextLabel"
-	label.Size = UDim2.new(1, -40, 1, 0)
-	label.Position = UDim2.fromOffset(32, 0)
+	label.Size = UDim2.new(1, -38, 1, 0)
+	label.Position = UDim2.fromOffset(30, 0)
 	label.BackgroundTransparency = 1
 	label.Text = text
 	label.TextColor3 = self.theme.TextSecondary
-	label.TextSize = if self.isMobile then 11 else 12
-	label.Font = Enum.Font.Gotham
+	label.TextSize = if self.isMobile then 12 else 13
+	applyFont(label, Fonts.Regular)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.TextTruncate = Enum.TextTruncate.AtEnd
 	label.Parent = labelFrame
@@ -1247,7 +1236,7 @@ function GUI:addLabel(text: string)
 end
 
 function GUI:addToggle(name: string, defaultValue: boolean?, callback: ((boolean) -> ())?)
-	local toggleHeight = if self.isMobile then 36 else 40
+	local toggleHeight = if self.isMobile then 36 else 38
 	local componentId = `{name}_toggle`
 	local currentValue = self:getComponentState(self.currentSidebarName, componentId, defaultValue == true)
 
@@ -1261,29 +1250,29 @@ function GUI:addToggle(name: string, defaultValue: boolean?, callback: ((boolean
 	toggleFrame.LayoutOrder = self:_nextOrder()
 	toggleFrame.Parent = self.contentScrolling
 
-	createCorner(toggleFrame, 8)
-	local cardStroke = createStroke(toggleFrame, self.theme.BorderSubtle, 1, 0.2)
+	createCorner(toggleFrame, 7)
+	local cardStroke = createStroke(toggleFrame, self.theme.BorderSubtle, 1, 0)
 
 	local toggleLabel = Instance.new("TextLabel")
 	toggleLabel.Name = "ToggleLabel"
-	toggleLabel.Size = UDim2.new(1, -68, 1, 0)
-	toggleLabel.Position = UDim2.fromOffset(14, 0)
+	toggleLabel.Size = UDim2.new(1, -64, 1, 0)
+	toggleLabel.Position = UDim2.fromOffset(12, 0)
 	toggleLabel.BackgroundTransparency = 1
 	toggleLabel.Text = name
 	toggleLabel.TextColor3 = self.theme.Text
 	toggleLabel.TextSize = if self.isMobile then 12 else 13
-	toggleLabel.Font = Enum.Font.GothamMedium
+	applyFont(toggleLabel, Fonts.Medium)
 	toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 	toggleLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	toggleLabel.Parent = toggleFrame
 
-	local trackW, trackH = 36, 20
-	local knobSize = 14
+	local trackW, trackH = 34, 18
+	local knobSize = 12
 
 	local toggleTrack = Instance.new("Frame")
 	toggleTrack.Name = "ToggleTrack"
 	toggleTrack.Size = UDim2.fromOffset(trackW, trackH)
-	toggleTrack.Position = UDim2.new(1, -trackW - 14, 0.5, -trackH / 2)
+	toggleTrack.Position = UDim2.new(1, -trackW - 12, 0.5, -trackH / 2)
 	toggleTrack.BackgroundColor3 = if currentValue then self.theme.Accent else self.theme.Control
 	toggleTrack.BorderSizePixel = 0
 	toggleTrack.Parent = toggleFrame
@@ -1364,7 +1353,7 @@ function GUI:addDropdown(
 	multiSelect: boolean?
 )
 	local isMulti = multiSelect == true
-	local dropdownHeight = if self.isMobile then 36 else 40
+	local dropdownHeight = if self.isMobile then 36 else 38
 	local componentId = `{name}_dropdown`
 
 	local initialDefault: any = defaultOption
@@ -1387,37 +1376,37 @@ function GUI:addDropdown(
 	dropdownFrame.LayoutOrder = self:_nextOrder()
 	dropdownFrame.Parent = self.contentScrolling
 
-	createCorner(dropdownFrame, 8)
-	local cardStroke = createStroke(dropdownFrame, self.theme.BorderSubtle, 1, 0.2)
+	createCorner(dropdownFrame, 7)
+	local cardStroke = createStroke(dropdownFrame, self.theme.BorderSubtle, 1, 0)
 
 	local dropdownLabel = Instance.new("TextLabel")
 	dropdownLabel.Name = "DropdownLabel"
-	dropdownLabel.Size = UDim2.new(0.52, -14, 1, 0)
-	dropdownLabel.Position = UDim2.fromOffset(14, 0)
+	dropdownLabel.Size = UDim2.new(0.54, -12, 1, 0)
+	dropdownLabel.Position = UDim2.fromOffset(12, 0)
 	dropdownLabel.BackgroundTransparency = 1
 	dropdownLabel.Text = name
 	dropdownLabel.TextColor3 = self.theme.Text
 	dropdownLabel.TextSize = if self.isMobile then 12 else 13
-	dropdownLabel.Font = Enum.Font.GothamMedium
+	applyFont(dropdownLabel, Fonts.Medium)
 	dropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
 	dropdownLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	dropdownLabel.Parent = dropdownFrame
 
-	local buttonWidth = if self.isMobile then 116 else 142
+	local buttonWidth = if self.isMobile then 114 else 136
 	local buttonHeight = if self.isMobile then 24 else 26
 
 	local dropdownButton = Instance.new("TextButton")
 	dropdownButton.Name = "DropdownButton"
 	dropdownButton.Size = UDim2.fromOffset(buttonWidth, buttonHeight)
-	dropdownButton.Position = UDim2.new(1, -buttonWidth - 12, 0.5, -buttonHeight / 2)
+	dropdownButton.Position = UDim2.new(1, -buttonWidth - 10, 0.5, -buttonHeight / 2)
 	dropdownButton.BackgroundColor3 = self.theme.Control
 	dropdownButton.BorderSizePixel = 0
 	dropdownButton.AutoButtonColor = false
 	dropdownButton.Text = ""
 	dropdownButton.Parent = dropdownFrame
 
-	createCorner(dropdownButton, 6)
-	local btnStroke = createStroke(dropdownButton, self.theme.Border, 1, 0.2)
+	createCorner(dropdownButton, 5)
+	local btnStroke = createStroke(dropdownButton, self.theme.BorderSubtle, 1, 0)
 
 	local displayText = ""
 	if isMulti then
@@ -1432,32 +1421,32 @@ function GUI:addDropdown(
 
 	local valueText = Instance.new("TextLabel")
 	valueText.Name = "ValueText"
-	valueText.Size = UDim2.new(1, -28, 1, 0)
-	valueText.Position = UDim2.fromOffset(10, 0)
+	valueText.Size = UDim2.new(1, -26, 1, 0)
+	valueText.Position = UDim2.fromOffset(9, 0)
 	valueText.BackgroundTransparency = 1
 	valueText.Text = displayText
 	valueText.TextColor3 = self.theme.TextSecondary
-	valueText.TextSize = if self.isMobile then 11 else 12
-	valueText.Font = Enum.Font.Gotham
+	valueText.TextSize = 12
+	applyFont(valueText, Fonts.Regular)
 	valueText.TextXAlignment = Enum.TextXAlignment.Left
 	valueText.TextTruncate = Enum.TextTruncate.AtEnd
 	valueText.Parent = dropdownButton
 
-	local chevron = self:createIcon("chevron-down", 12, self.theme.TextMuted, dropdownButton)
+	local chevron = self:createIcon("chevron-down", 11, self.theme.TextMuted, dropdownButton)
 	chevron.Name = "Arrow"
-	chevron.Position = UDim2.new(1, -12, 0.5, 0)
+	chevron.Position = UDim2.new(1, -11, 0.5, 0)
 	chevron.AnchorPoint = Vector2.new(0.5, 0.5)
 
 	dropdownButton.MouseEnter:Connect(function()
 		TweenService:Create(dropdownButton, FAST_TWEEN, { BackgroundColor3 = self.theme.ControlHover }):Play()
-		TweenService:Create(btnStroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0.1 }):Play()
+		TweenService:Create(btnStroke, FAST_TWEEN, { Color = self.theme.Border }):Play()
 		TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.Border }):Play()
 		self:tintIcon(chevron, self.theme.Text)
 	end)
 
 	dropdownButton.MouseLeave:Connect(function()
 		TweenService:Create(dropdownButton, FAST_TWEEN, { BackgroundColor3 = self.theme.Control }):Play()
-		TweenService:Create(btnStroke, FAST_TWEEN, { Color = self.theme.Border, Transparency = 0.2 }):Play()
+		TweenService:Create(btnStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
 		TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
 		self:tintIcon(chevron, self.theme.TextMuted)
 	end)
@@ -1494,15 +1483,14 @@ function GUI:createDropdownDialog(
 	multiSelect: boolean?
 )
 	local isMulti = multiSelect == true
-	local dialogW = if self.isMobile then 260 else 300
-	local dialogH = if self.isMobile then 230 else 260
+	local dialogW = if self.isMobile then 260 else 290
+	local dialogH = if self.isMobile then 225 else 250
 
 	local existingOverlay = self.screenGui:FindFirstChild("DropdownOverlay")
 	if existingOverlay then
 		existingOverlay:Destroy()
 	end
 
-	-- TextButton overlay fixes the Frame.MouseButton1Click bug and blocks clicks through backdrop
 	local overlay = Instance.new("TextButton")
 	overlay.Name = "DropdownOverlay"
 	overlay.Size = UDim2.fromScale(1, 1)
@@ -1515,7 +1503,7 @@ function GUI:createDropdownDialog(
 	overlay.ZIndex = 30
 	overlay.Parent = self.screenGui
 
-	TweenService:Create(overlay, FAST_TWEEN, { BackgroundTransparency = 0.45 }):Play()
+	TweenService:Create(overlay, FAST_TWEEN, { BackgroundTransparency = 0.5 }):Play()
 
 	local dialog = Instance.new("TextButton")
 	dialog.Name = "DropdownDialog"
@@ -1530,21 +1518,21 @@ function GUI:createDropdownDialog(
 	dialog.Parent = overlay
 
 	local dialogScale = Instance.new("UIScale")
-	dialogScale.Scale = 0.92
+	dialogScale.Scale = 0.94
 	dialogScale.Parent = dialog
 
-	createCorner(dialog, 10)
-	createStroke(dialog, self.theme.Border, 1, 0.1)
+	createCorner(dialog, 9)
+	createStroke(dialog, self.theme.Border, 1, 0)
 
 	local dialogTitle = Instance.new("TextLabel")
 	dialogTitle.Name = "DialogTitle"
-	dialogTitle.Size = UDim2.new(1, -48, 0, 28)
-	dialogTitle.Position = UDim2.fromOffset(14, 8)
+	dialogTitle.Size = UDim2.new(1, -48, 0, 26)
+	dialogTitle.Position = UDim2.fromOffset(14, 9)
 	dialogTitle.BackgroundTransparency = 1
 	dialogTitle.Text = if isMulti then `{title} (Multi)` else title
 	dialogTitle.TextColor3 = self.theme.Text
-	dialogTitle.TextSize = if self.isMobile then 13 else 14
-	dialogTitle.Font = Enum.Font.GothamBold
+	dialogTitle.TextSize = 13
+	applyFont(dialogTitle, Fonts.SemiBold)
 	dialogTitle.TextXAlignment = Enum.TextXAlignment.Left
 	dialogTitle.TextTruncate = Enum.TextTruncate.AtEnd
 	dialogTitle.ZIndex = 32
@@ -1552,8 +1540,8 @@ function GUI:createDropdownDialog(
 
 	local closeButton = Instance.new("TextButton")
 	closeButton.Name = "CloseButton"
-	closeButton.Size = UDim2.fromOffset(24, 24)
-	closeButton.Position = UDim2.new(1, -34, 0, 10)
+	closeButton.Size = UDim2.fromOffset(22, 22)
+	closeButton.Position = UDim2.new(1, -32, 0, 11)
 	closeButton.BackgroundColor3 = self.theme.SurfaceHover
 	closeButton.BackgroundTransparency = 1
 	closeButton.BorderSizePixel = 0
@@ -1561,9 +1549,9 @@ function GUI:createDropdownDialog(
 	closeButton.AutoButtonColor = false
 	closeButton.ZIndex = 32
 	closeButton.Parent = dialog
-	createCorner(closeButton, 6)
+	createCorner(closeButton, 5)
 
-	local closeIcon = self:createIcon("close", 11, self.theme.TextSecondary, closeButton)
+	local closeIcon = self:createIcon("close", 10, self.theme.TextSecondary, closeButton)
 	closeIcon.Position = UDim2.fromScale(0.5, 0.5)
 	closeIcon.AnchorPoint = Vector2.new(0.5, 0.5)
 
@@ -1578,47 +1566,47 @@ function GUI:createDropdownDialog(
 
 	local searchFrame = Instance.new("Frame")
 	searchFrame.Name = "SearchFrame"
-	searchFrame.Size = UDim2.new(1, -24, 0, 28)
+	searchFrame.Size = UDim2.new(1, -24, 0, 26)
 	searchFrame.Position = UDim2.fromOffset(12, 40)
-	searchFrame.BackgroundColor3 = self.theme.Control
+	searchFrame.BackgroundColor3 = self.theme.Surface
 	searchFrame.BorderSizePixel = 0
 	searchFrame.ZIndex = 32
 	searchFrame.Parent = dialog
 	createCorner(searchFrame, 6)
-	local searchStroke = createStroke(searchFrame, self.theme.BorderSubtle, 1, 0.2)
+	local searchStroke = createStroke(searchFrame, self.theme.BorderSubtle, 1, 0)
 
-	local searchIcon = self:createIcon("search", 12, self.theme.TextMuted, searchFrame)
+	local searchIcon = self:createIcon("search", 11, self.theme.TextMuted, searchFrame)
 	searchIcon.Position = UDim2.new(0, 9, 0.5, 0)
 	searchIcon.AnchorPoint = Vector2.new(0, 0.5)
 
 	local searchBox = Instance.new("TextBox")
 	searchBox.Name = "SearchBox"
 	searchBox.Size = UDim2.new(1, -30, 1, 0)
-	searchBox.Position = UDim2.fromOffset(26, 0)
+	searchBox.Position = UDim2.fromOffset(25, 0)
 	searchBox.BackgroundTransparency = 1
 	searchBox.Text = ""
 	searchBox.PlaceholderText = "Filter options..."
 	searchBox.TextColor3 = self.theme.Text
 	searchBox.PlaceholderColor3 = self.theme.TextMuted
 	searchBox.TextSize = 12
-	searchBox.Font = Enum.Font.Gotham
+	applyFont(searchBox, Fonts.Regular)
 	searchBox.TextXAlignment = Enum.TextXAlignment.Left
 	searchBox.ClearTextOnFocus = false
 	searchBox.ZIndex = 33
 	searchBox.Parent = searchFrame
 
 	searchBox.Focused:Connect(function()
-		TweenService:Create(searchStroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0 }):Play()
+		TweenService:Create(searchStroke, FAST_TWEEN, { Color = self.theme.Border }):Play()
 	end)
 	searchBox.FocusLost:Connect(function()
-		TweenService:Create(searchStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.2 }):Play()
+		TweenService:Create(searchStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
 	end)
 
-	local bottomReserved = if isMulti then 114 else 78
+	local bottomReserved = if isMulti then 112 else 76
 	local scrollFrame = Instance.new("ScrollingFrame")
 	scrollFrame.Name = "OptionsScroll"
 	scrollFrame.Size = UDim2.new(1, -24, 1, -bottomReserved)
-	scrollFrame.Position = UDim2.fromOffset(12, 74)
+	scrollFrame.Position = UDim2.fromOffset(12, 72)
 	scrollFrame.BackgroundTransparency = 1
 	scrollFrame.BorderSizePixel = 0
 	scrollFrame.ScrollBarThickness = 2
@@ -1645,8 +1633,8 @@ function GUI:createDropdownDialog(
 
 		local optionFrame = Instance.new("Frame")
 		optionFrame.Name = `Option{i}`
-		optionFrame.Size = UDim2.new(1, 0, 0, 30)
-		optionFrame.BackgroundColor3 = if isSelected then self.theme.AccentSoft else self.theme.Surface
+		optionFrame.Size = UDim2.new(1, 0, 0, 28)
+		optionFrame.BackgroundColor3 = if isSelected then self.theme.SurfaceActive else self.theme.Surface
 		optionFrame.BorderSizePixel = 0
 		optionFrame.LayoutOrder = i
 		optionFrame.ZIndex = 32
@@ -1655,14 +1643,14 @@ function GUI:createDropdownDialog(
 
 		local optStroke = createStroke(
 			optionFrame,
-			if isSelected then self.theme.Accent else self.theme.BorderSubtle,
+			if isSelected then self.theme.Border else self.theme.BorderSubtle,
 			1,
-			if isSelected then 0.15 else 0.4
+			0
 		)
 
-		local checkIcon = self:createIcon("check", 12, self.theme.Accent, optionFrame)
+		local checkIcon = self:createIcon("check", 11, self.theme.Accent, optionFrame)
 		checkIcon.Name = "CheckIcon"
-		checkIcon.Position = UDim2.new(1, -14, 0.5, 0)
+		checkIcon.Position = UDim2.new(1, -13, 0.5, 0)
 		checkIcon.AnchorPoint = Vector2.new(0.5, 0.5)
 		checkIcon.Visible = isSelected
 
@@ -1673,12 +1661,12 @@ function GUI:createDropdownDialog(
 		optionButton.Text = option
 		optionButton.TextColor3 = if isSelected then self.theme.Text else self.theme.TextSecondary
 		optionButton.TextSize = 12
-		optionButton.Font = if isSelected then Enum.Font.GothamMedium else Enum.Font.Gotham
+		applyFont(optionButton, if isSelected then Fonts.Medium else Fonts.Regular)
 		optionButton.TextXAlignment = Enum.TextXAlignment.Left
 		optionButton.TextTruncate = Enum.TextTruncate.AtEnd
 		optionButton.ZIndex = 33
 		optionButton.Parent = optionFrame
-		createPadding(optionButton, 0, 0, 10, 28)
+		createPadding(optionButton, 0, 0, 10, 26)
 
 		optionFrames[option] = {
 			frame = optionFrame,
@@ -1707,13 +1695,12 @@ function GUI:createDropdownDialog(
 				local entry = optionFrames[option]
 				entry.selected = not entry.selected
 				entry.check.Visible = entry.selected
-				entry.button.Font = if entry.selected then Enum.Font.GothamMedium else Enum.Font.Gotham
+				applyFont(entry.button, if entry.selected then Fonts.Medium else Fonts.Regular)
 				TweenService:Create(entry.frame, FAST_TWEEN, {
-					BackgroundColor3 = if entry.selected then self.theme.AccentSoft else self.theme.Surface,
+					BackgroundColor3 = if entry.selected then self.theme.SurfaceActive else self.theme.Surface,
 				}):Play()
 				TweenService:Create(entry.stroke, FAST_TWEEN, {
-					Color = if entry.selected then self.theme.Accent else self.theme.BorderSubtle,
-					Transparency = if entry.selected then 0.15 else 0.4,
+					Color = if entry.selected then self.theme.Border else self.theme.BorderSubtle,
 				}):Play()
 				TweenService:Create(entry.button, FAST_TWEEN, {
 					TextColor3 = if entry.selected then self.theme.Text else self.theme.TextSecondary,
@@ -1722,27 +1709,24 @@ function GUI:createDropdownDialog(
 				for _, data in optionFrames do
 					data.selected = false
 					data.check.Visible = false
-					data.button.Font = Enum.Font.Gotham
+					applyFont(data.button, Fonts.Regular)
 					TweenService:Create(data.frame, FAST_TWEEN, { BackgroundColor3 = self.theme.Surface }):Play()
-					TweenService:Create(data.stroke, FAST_TWEEN, {
-						Color = self.theme.BorderSubtle,
-						Transparency = 0.4,
-					}):Play()
+					TweenService:Create(data.stroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
 				end
 
 				local entry = optionFrames[option]
 				entry.selected = true
 				entry.check.Visible = true
-				entry.button.Font = Enum.Font.GothamMedium
-				TweenService:Create(entry.frame, FAST_TWEEN, { BackgroundColor3 = self.theme.AccentSoft }):Play()
-				TweenService:Create(entry.stroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0.15 }):Play()
+				applyFont(entry.button, Fonts.Medium)
+				TweenService:Create(entry.frame, FAST_TWEEN, { BackgroundColor3 = self.theme.SurfaceActive }):Play()
+				TweenService:Create(entry.stroke, FAST_TWEEN, { Color = self.theme.Border }):Play()
 
 				local componentId = `{title}_dropdown`
 				self:saveComponentState(self.currentSidebarName, componentId, option)
 				self.dropdownSelections[title] = option
 				updateDropdownButtonLabel(button, option)
 
-				task.wait(0.08)
+				task.wait(0.06)
 				if overlay and overlay.Parent then
 					overlay:Destroy()
 				end
@@ -1759,22 +1743,23 @@ function GUI:createDropdownDialog(
 		confirmButton.Name = "ConfirmButton"
 		confirmButton.Size = UDim2.new(1, -24, 0, 28)
 		confirmButton.Position = UDim2.new(0, 12, 1, -36)
-		confirmButton.BackgroundColor3 = self.theme.Accent
+		confirmButton.BackgroundColor3 = self.theme.Control
 		confirmButton.BorderSizePixel = 0
-		confirmButton.Text = "Apply Selection"
-		confirmButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		confirmButton.Text = "Done"
+		confirmButton.TextColor3 = self.theme.Text
 		confirmButton.TextSize = 12
-		confirmButton.Font = Enum.Font.GothamBold
+		applyFont(confirmButton, Fonts.SemiBold)
 		confirmButton.AutoButtonColor = false
 		confirmButton.ZIndex = 33
 		confirmButton.Parent = dialog
 		createCorner(confirmButton, 6)
+		createStroke(confirmButton, self.theme.Border, 1, 0)
 
 		confirmButton.MouseEnter:Connect(function()
-			TweenService:Create(confirmButton, FAST_TWEEN, { BackgroundColor3 = self.theme.AccentHover }):Play()
+			TweenService:Create(confirmButton, FAST_TWEEN, { BackgroundColor3 = self.theme.ControlHover }):Play()
 		end)
 		confirmButton.MouseLeave:Connect(function()
-			TweenService:Create(confirmButton, FAST_TWEEN, { BackgroundColor3 = self.theme.Accent }):Play()
+			TweenService:Create(confirmButton, FAST_TWEEN, { BackgroundColor3 = self.theme.Control }):Play()
 		end)
 
 		confirmButton.MouseButton1Click:Connect(function()
@@ -1817,14 +1802,14 @@ function GUI:createDropdownDialog(
 		overlay:Destroy()
 	end)
 
-	TweenService:Create(dialogScale, SPRING_TWEEN, { Scale = 1 }):Play()
+	TweenService:Create(dialogScale, SMOOTH_TWEEN, { Scale = 1 }):Play()
 	table.insert(self.dialogs, overlay)
 
 	return dialog
 end
 
 function GUI:addButton(name: string, callback: (() -> ())?, iconName: string?)
-	local buttonHeight = if self.isMobile then 34 else 38
+	local buttonHeight = if self.isMobile then 34 else 36
 
 	local buttonFrame = Instance.new("Frame")
 	buttonFrame.Name = `{name}ButtonFrame`
@@ -1833,45 +1818,50 @@ function GUI:addButton(name: string, callback: (() -> ())?, iconName: string?)
 	buttonFrame.LayoutOrder = self:_nextOrder()
 	buttonFrame.Parent = self.contentScrolling
 
+	-- Minimalist low-profile surface button (instead of a loud full-width purple block)
 	local button = Instance.new("TextButton")
 	button.Name = `{name}Button`
 	button.Size = UDim2.fromScale(1, 1)
 	button.Position = UDim2.fromScale(0.5, 0.5)
 	button.AnchorPoint = Vector2.new(0.5, 0.5)
-	button.BackgroundColor3 = self.theme.Accent
+	button.BackgroundColor3 = self.theme.Control
 	button.BorderSizePixel = 0
 	button.Text = name
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.TextColor3 = self.theme.Text
 	button.TextSize = if self.isMobile then 12 else 13
-	button.Font = Enum.Font.GothamBold
+	applyFont(button, Fonts.Medium)
 	button.AutoButtonColor = false
 	button.ClipsDescendants = true
 	button.Parent = buttonFrame
 
-	createCorner(button, 8)
-	createStroke(button, self.theme.AccentHover, 1, 0.35)
+	createCorner(button, 7)
+	local btnStroke = createStroke(button, self.theme.BorderSubtle, 1, 0)
 
 	if iconName then
-		local icon = self:createIcon(iconName, 14, Color3.fromRGB(255, 255, 255), button)
-		icon.Position = UDim2.new(0, 14, 0.5, 0)
+		local icon = self:createIcon(iconName, 13, self.theme.TextSecondary, button)
+		icon.Position = UDim2.new(0, 12, 0.5, 0)
 		icon.AnchorPoint = Vector2.new(0, 0.5)
 	end
 
-	local chevronRight = self:createIcon("chevron-right", 12, Color3.fromRGB(255, 255, 255), button)
-	chevronRight.Position = UDim2.new(1, -14, 0.5, 0)
+	local chevronRight = self:createIcon("chevron-right", 11, self.theme.TextMuted, button)
+	chevronRight.Position = UDim2.new(1, -13, 0.5, 0)
 	chevronRight.AnchorPoint = Vector2.new(0.5, 0.5)
 
 	button.MouseEnter:Connect(function()
-		TweenService:Create(button, FAST_TWEEN, { BackgroundColor3 = self.theme.AccentHover }):Play()
+		TweenService:Create(button, FAST_TWEEN, { BackgroundColor3 = self.theme.ControlHover }):Play()
+		TweenService:Create(btnStroke, FAST_TWEEN, { Color = self.theme.Border }):Play()
 		TweenService:Create(chevronRight, FAST_TWEEN, { Position = UDim2.new(1, -11, 0.5, 0) }):Play()
+		self:tintIcon(chevronRight, self.theme.Text)
 	end)
 
 	button.MouseLeave:Connect(function()
 		TweenService:Create(button, FAST_TWEEN, {
-			BackgroundColor3 = self.theme.Accent,
+			BackgroundColor3 = self.theme.Control,
 			Size = UDim2.fromScale(1, 1),
 		}):Play()
-		TweenService:Create(chevronRight, FAST_TWEEN, { Position = UDim2.new(1, -14, 0.5, 0) }):Play()
+		TweenService:Create(btnStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
+		TweenService:Create(chevronRight, FAST_TWEEN, { Position = UDim2.new(1, -13, 0.5, 0) }):Play()
+		self:tintIcon(chevronRight, self.theme.TextMuted)
 	end)
 
 	button.MouseButton1Click:Connect(function()
@@ -1882,33 +1872,16 @@ function GUI:addButton(name: string, callback: (() -> ())?, iconName: string?)
 		end
 		table.clear(self.dialogs)
 
-		local pressTween = TweenService:Create(button, TweenInfo.new(0.08, Enum.EasingStyle.Quad), {
-			Size = UDim2.new(1, -4, 1, -2),
+		TweenService:Create(btnStroke, INSTANT_TWEEN, { Color = self.theme.Accent }):Play()
+		local pressTween = TweenService:Create(button, INSTANT_TWEEN, {
+			BackgroundColor3 = self.theme.SurfaceActive,
 		})
 		pressTween:Play()
-		pressTween.Completed:Connect(function()
-			TweenService:Create(button, FAST_TWEEN, { Size = UDim2.fromScale(1, 1) }):Play()
-		end)
-
-		local ripple = Instance.new("Frame")
-		ripple.Name = "Ripple"
-		ripple.Size = UDim2.fromOffset(0, 0)
-		ripple.Position = UDim2.fromScale(0.5, 0.5)
-		ripple.AnchorPoint = Vector2.new(0.5, 0.5)
-		ripple.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		ripple.BackgroundTransparency = 0.72
-		ripple.BorderSizePixel = 0
-		ripple.ZIndex = 2
-		ripple.Parent = button
-		createCorner(ripple, 100)
-
-		local rippleExpand = TweenService:Create(ripple, TweenInfo.new(0.45, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-			Size = UDim2.fromOffset(180, 180),
-			BackgroundTransparency = 1,
-		})
-		rippleExpand:Play()
-		rippleExpand.Completed:Connect(function()
-			ripple:Destroy()
+		task.delay(0.12, function()
+			if button and button.Parent then
+				TweenService:Create(button, FAST_TWEEN, { BackgroundColor3 = self.theme.ControlHover }):Play()
+				TweenService:Create(btnStroke, FAST_TWEEN, { Color = self.theme.Border }):Play()
+			end
 		end)
 
 		if callback then
@@ -1928,7 +1901,7 @@ function GUI:addSlider(
 	step: number?,
 	suffix: string?
 )
-	local sliderHeight = if self.isMobile then 52 else 56
+	local sliderHeight = if self.isMobile then 46 else 48
 	local componentId = `{name}_slider`
 
 	local range = math.max(0.0001, maxValue - minValue)
@@ -1938,7 +1911,6 @@ function GUI:addSlider(
 	local function snapValue(raw: number): number
 		local clamped = math.clamp(raw, minValue, maxValue)
 		local snapped = minValue + math.floor(((clamped - minValue) / resolvedStep) + 0.5) * resolvedStep
-		-- Clean floating point precision (e.g. 0.30000000000000004 -> 0.3)
 		return tonumber(string.format("%.4f", math.clamp(snapped, minValue, maxValue))) or minValue
 	end
 
@@ -1963,131 +1935,130 @@ function GUI:addSlider(
 	sliderFrame.LayoutOrder = self:_nextOrder()
 	sliderFrame.Parent = self.contentScrolling
 
-	createCorner(sliderFrame, 8)
-	local cardStroke = createStroke(sliderFrame, self.theme.BorderSubtle, 1, 0.2)
+	createCorner(sliderFrame, 7)
+	local cardStroke = createStroke(sliderFrame, self.theme.BorderSubtle, 1, 0)
 
-	-- Top Row: Title on Left, Stepper (- [Value] +) on Right
+	-- Top Row: Label on Left, Compact Stepper (- [Value] +) on Right
 	local sliderLabel = Instance.new("TextLabel")
 	sliderLabel.Name = "SliderLabel"
-	sliderLabel.Size = UDim2.new(1, -130, 0, 20)
-	sliderLabel.Position = UDim2.fromOffset(14, 7)
+	sliderLabel.Size = UDim2.new(1, -120, 0, 18)
+	sliderLabel.Position = UDim2.fromOffset(12, 6)
 	sliderLabel.BackgroundTransparency = 1
 	sliderLabel.Text = name
 	sliderLabel.TextColor3 = self.theme.Text
 	sliderLabel.TextSize = if self.isMobile then 12 else 13
-	sliderLabel.Font = Enum.Font.GothamMedium
+	applyFont(sliderLabel, Fonts.Medium)
 	sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
 	sliderLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	sliderLabel.Parent = sliderFrame
 
 	local controlsGroup = Instance.new("Frame")
 	controlsGroup.Name = "ControlsGroup"
-	controlsGroup.Size = UDim2.fromOffset(98, 20)
-	controlsGroup.Position = UDim2.new(1, -112, 0, 7)
+	controlsGroup.Size = UDim2.fromOffset(92, 18)
+	controlsGroup.Position = UDim2.new(1, -104, 0, 6)
 	controlsGroup.BackgroundTransparency = 1
 	controlsGroup.Parent = sliderFrame
 
 	local minusBtn = Instance.new("TextButton")
 	minusBtn.Name = "MinusButton"
-	minusBtn.Size = UDim2.fromOffset(20, 20)
+	minusBtn.Size = UDim2.fromOffset(18, 18)
 	minusBtn.Position = UDim2.fromOffset(0, 0)
 	minusBtn.BackgroundColor3 = self.theme.Control
 	minusBtn.BorderSizePixel = 0
 	minusBtn.Text = ""
 	minusBtn.AutoButtonColor = false
 	minusBtn.Parent = controlsGroup
-	createCorner(minusBtn, 5)
-	local minusStroke = createStroke(minusBtn, self.theme.BorderSubtle, 1, 0.25)
+	createCorner(minusBtn, 4)
 
-	local minusIcon = self:createIcon("minus", 10, self.theme.TextSecondary, minusBtn)
+	local minusIcon = self:createIcon("minus", 9, self.theme.TextMuted, minusBtn)
 	minusIcon.Position = UDim2.fromScale(0.5, 0.5)
 	minusIcon.AnchorPoint = Vector2.new(0.5, 0.5)
 
 	local valueBadge = Instance.new("Frame")
 	valueBadge.Name = "ValueBadge"
-	valueBadge.Size = UDim2.fromOffset(50, 20)
-	valueBadge.Position = UDim2.fromOffset(24, 0)
+	valueBadge.Size = UDim2.fromOffset(48, 18)
+	valueBadge.Position = UDim2.fromOffset(22, 0)
 	valueBadge.BackgroundColor3 = self.theme.Control
 	valueBadge.BorderSizePixel = 0
 	valueBadge.Parent = controlsGroup
-	createCorner(valueBadge, 5)
-	local badgeStroke = createStroke(valueBadge, self.theme.BorderSubtle, 1, 0.2)
+	createCorner(valueBadge, 4)
+	local badgeStroke = createStroke(valueBadge, self.theme.BorderSubtle, 1, 0)
 
-	-- Interactive TextBox (named ValueLabel for backwards compatibility)
 	local valueLabel = Instance.new("TextBox")
 	valueLabel.Name = "ValueLabel"
-	valueLabel.Size = UDim2.new(1, -6, 1, 0)
-	valueLabel.Position = UDim2.fromOffset(3, 0)
+	valueLabel.Size = UDim2.new(1, -4, 1, 0)
+	valueLabel.Position = UDim2.fromOffset(2, 0)
 	valueLabel.BackgroundTransparency = 1
 	valueLabel.Text = formatValue(currentValue)
-	valueLabel.TextColor3 = self.theme.Accent
+	valueLabel.TextColor3 = self.theme.Text
 	valueLabel.PlaceholderColor3 = self.theme.TextMuted
 	valueLabel.TextSize = 11
-	valueLabel.Font = Enum.Font.GothamBold
+	applyFont(valueLabel, Fonts.SemiBold)
 	valueLabel.TextXAlignment = Enum.TextXAlignment.Center
 	valueLabel.ClearTextOnFocus = false
 	valueLabel.Parent = valueBadge
 
 	local plusBtn = Instance.new("TextButton")
 	plusBtn.Name = "PlusButton"
-	plusBtn.Size = UDim2.fromOffset(20, 20)
-	plusBtn.Position = UDim2.fromOffset(78, 0)
+	plusBtn.Size = UDim2.fromOffset(18, 18)
+	plusBtn.Position = UDim2.fromOffset(74, 0)
 	plusBtn.BackgroundColor3 = self.theme.Control
 	plusBtn.BorderSizePixel = 0
 	plusBtn.Text = ""
 	plusBtn.AutoButtonColor = false
 	plusBtn.Parent = controlsGroup
-	createCorner(plusBtn, 5)
-	local plusStroke = createStroke(plusBtn, self.theme.BorderSubtle, 1, 0.25)
+	createCorner(plusBtn, 4)
 
-	local plusIcon = self:createIcon("plus", 10, self.theme.TextSecondary, plusBtn)
+	local plusIcon = self:createIcon("plus", 9, self.theme.TextMuted, plusBtn)
 	plusIcon.Position = UDim2.fromScale(0.5, 0.5)
 	plusIcon.AnchorPoint = Vector2.new(0.5, 0.5)
 
-	-- Bottom Row: Minimalist Track, Fill, Halo, and Thumb
-	local trackHeight = 6
+	-- Bottom Row: Sleek 4px Minimalist Track & Flush Solid White Thumb
+	local trackHeight = 4
+	local knobSize = 12
+
 	local sliderTrack = Instance.new("Frame")
 	sliderTrack.Name = "SliderTrack"
-	sliderTrack.Size = UDim2.new(1, -28, 0, trackHeight)
-	sliderTrack.Position = UDim2.new(0, 14, 1, -15)
+	sliderTrack.Size = UDim2.new(1, -24, 0, trackHeight)
+	sliderTrack.Position = UDim2.new(0, 12, 1, -13)
 	sliderTrack.BackgroundColor3 = self.theme.Control
 	sliderTrack.BorderSizePixel = 0
 	sliderTrack.Parent = sliderFrame
 	createCorner(sliderTrack, trackHeight / 2)
-	local trackStroke = createStroke(sliderTrack, self.theme.BorderSubtle, 1, 0.35)
 
 	local initialAlpha = math.clamp((currentValue - minValue) / range, 0, 1)
 
+	-- Offset keeps the 12px thumb flush inside the left/right edges of the track at 0% and 100%
+	local function getTrackPos(alpha: number): UDim2
+		return UDim2.new(alpha, (0.5 - alpha) * knobSize, 0.5, 0)
+	end
+
+	local function getFillSize(alpha: number): UDim2
+		return UDim2.new(alpha, (0.5 - alpha) * knobSize, 1, 0)
+	end
+
 	local sliderFill = Instance.new("Frame")
 	sliderFill.Name = "SliderFill"
-	sliderFill.Size = UDim2.fromScale(initialAlpha, 1)
+	sliderFill.Size = getFillSize(initialAlpha)
 	sliderFill.BackgroundColor3 = self.theme.Accent
 	sliderFill.BorderSizePixel = 0
 	sliderFill.ZIndex = 2
 	sliderFill.Parent = sliderTrack
 	createCorner(sliderFill, trackHeight / 2)
 
-	local fillGradient = Instance.new("UIGradient")
-	fillGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, self.theme.Accent),
-		ColorSequenceKeypoint.new(1, self.theme.AccentHover),
-	})
-	fillGradient.Parent = sliderFill
-
-	local knobSize = 14
 	local sliderKnob = Instance.new("Frame")
 	sliderKnob.Name = "SliderKnob"
 	sliderKnob.Size = UDim2.fromOffset(knobSize, knobSize)
-	sliderKnob.Position = UDim2.fromScale(initialAlpha, 0.5)
+	sliderKnob.Position = getTrackPos(initialAlpha)
 	sliderKnob.AnchorPoint = Vector2.new(0.5, 0.5)
-	sliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	sliderKnob.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
 	sliderKnob.BorderSizePixel = 0
 	sliderKnob.ZIndex = 4
 	sliderKnob.Parent = sliderTrack
 	createCorner(sliderKnob, knobSize)
-	local knobStroke = createStroke(sliderKnob, self.theme.Accent, 2, 0)
+	createStroke(sliderKnob, self.theme.Background, 1.5, 0)
 
-	-- Soft radial halo around the thumb on hover/drag
+	-- Subtle halo ring on drag/hover
 	local knobHalo = Instance.new("Frame")
 	knobHalo.Name = "KnobHalo"
 	knobHalo.Size = UDim2.fromOffset(0, 0)
@@ -2098,24 +2069,11 @@ function GUI:addSlider(
 	knobHalo.BorderSizePixel = 0
 	knobHalo.ZIndex = 3
 	knobHalo.Parent = sliderKnob
-	createCorner(knobHalo, 30)
+	createCorner(knobHalo, 24)
 
-	-- Inner accent core dot
-	local knobCore = Instance.new("Frame")
-	knobCore.Name = "KnobCore"
-	knobCore.Size = UDim2.fromOffset(4, 4)
-	knobCore.Position = UDim2.fromScale(0.5, 0.5)
-	knobCore.AnchorPoint = Vector2.new(0.5, 0.5)
-	knobCore.BackgroundColor3 = self.theme.Accent
-	knobCore.BorderSizePixel = 0
-	knobCore.ZIndex = 5
-	knobCore.Parent = sliderKnob
-	createCorner(knobCore, 4)
-
-	-- Enlarged invisible hit box for effortless touch & mouse dragging
 	local hitArea = Instance.new("TextButton")
 	hitArea.Name = "HitArea"
-	hitArea.Size = UDim2.new(1, 18, 0, 24)
+	hitArea.Size = UDim2.new(1, 12, 0, 22)
 	hitArea.Position = UDim2.fromScale(0.5, 0.5)
 	hitArea.AnchorPoint = Vector2.new(0.5, 0.5)
 	hitArea.BackgroundTransparency = 1
@@ -2136,14 +2094,12 @@ function GUI:addSlider(
 			valueLabel.Text = formatValue(snapped)
 		end
 
-		local tweenTime = if dragging then 0.05 else 0.14
-		local tInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-
+		local tInfo = if dragging then INSTANT_TWEEN else FAST_TWEEN
 		TweenService:Create(sliderFill, tInfo, {
-			Size = UDim2.fromScale(alpha, 1),
+			Size = getFillSize(alpha),
 		}):Play()
 		TweenService:Create(sliderKnob, tInfo, {
-			Position = UDim2.fromScale(alpha, 0.5),
+			Position = getTrackPos(alpha),
 		}):Play()
 
 		self:saveComponentState(self.currentSidebarName, componentId, snapped)
@@ -2153,52 +2109,45 @@ function GUI:addSlider(
 	end
 
 	local function updateFromInput(input: InputObject)
-		local trackWidth = math.max(1, sliderTrack.AbsoluteSize.X)
-		local relativePos = math.clamp((input.Position.X - sliderTrack.AbsolutePosition.X) / trackWidth, 0, 1)
+		local trackWidth = math.max(1, sliderTrack.AbsoluteSize.X - knobSize)
+		local startX = sliderTrack.AbsolutePosition.X + (knobSize * 0.5)
+		local relativePos = math.clamp((input.Position.X - startX) / trackWidth, 0, 1)
 		local rawVal = minValue + (maxValue - minValue) * relativePos
 		applyValue(rawVal, true)
 	end
 
 	local function setVisualActive(active: boolean)
 		if active then
-			TweenService:Create(sliderFrame, FAST_TWEEN, { BackgroundColor3 = self.theme.SurfaceHover }):Play()
-			TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0.1 }):Play()
-			TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0 }):Play()
-			TweenService:Create(valueBadge, FAST_TWEEN, { BackgroundColor3 = self.theme.AccentSoft }):Play()
+			TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.Border }):Play()
+			TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.Accent }):Play()
 			TweenService:Create(sliderKnob, FAST_TWEEN, { Size = UDim2.fromOffset(knobSize + 2, knobSize + 2) }):Play()
-			TweenService:Create(knobCore, FAST_TWEEN, { Size = UDim2.fromOffset(6, 6) }):Play()
 			TweenService:Create(knobHalo, FAST_TWEEN, {
-				Size = UDim2.fromOffset(26, 26),
-				BackgroundTransparency = 0.78,
+				Size = UDim2.fromOffset(22, 22),
+				BackgroundTransparency = 0.8,
 			}):Play()
 		else
-			TweenService:Create(sliderFrame, FAST_TWEEN, { BackgroundColor3 = self.theme.Surface }):Play()
-			TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.2 }):Play()
-			TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.2 }):Play()
-			TweenService:Create(valueBadge, FAST_TWEEN, { BackgroundColor3 = self.theme.Control }):Play()
+			TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
+			TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
 			TweenService:Create(sliderKnob, FAST_TWEEN, { Size = UDim2.fromOffset(knobSize, knobSize) }):Play()
-			TweenService:Create(knobCore, FAST_TWEEN, { Size = UDim2.fromOffset(4, 4) }):Play()
 			TweenService:Create(knobHalo, FAST_TWEEN, {
-				Size = if hoveringTrack then UDim2.fromOffset(22, 22) else UDim2.fromOffset(0, 0),
-				BackgroundTransparency = if hoveringTrack then 0.86 else 1,
+				Size = if hoveringTrack then UDim2.fromOffset(18, 18) else UDim2.fromOffset(0, 0),
+				BackgroundTransparency = if hoveringTrack then 0.88 else 1,
 			}):Play()
 		end
 	end
 
 	hitArea.MouseEnter:Connect(function()
 		hoveringTrack = true
-		TweenService:Create(trackStroke, FAST_TWEEN, { Color = self.theme.Border, Transparency = 0.1 }):Play()
 		if not dragging then
 			TweenService:Create(knobHalo, FAST_TWEEN, {
-				Size = UDim2.fromOffset(22, 22),
-				BackgroundTransparency = 0.86,
+				Size = UDim2.fromOffset(18, 18),
+				BackgroundTransparency = 0.88,
 			}):Play()
 		end
 	end)
 
 	hitArea.MouseLeave:Connect(function()
 		hoveringTrack = false
-		TweenService:Create(trackStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.35 }):Play()
 		if not dragging then
 			TweenService:Create(knobHalo, FAST_TWEEN, {
 				Size = UDim2.fromOffset(0, 0),
@@ -2252,34 +2201,30 @@ function GUI:addSlider(
 		end)
 	)
 
-	-- Stepper buttons (- / +)
-	local function bindStepBtn(btn: TextButton, stroke: UIStroke, icon: GuiObject, delta: number)
+	local function bindStepBtn(btn: TextButton, icon: GuiObject, delta: number)
 		btn.MouseEnter:Connect(function()
 			TweenService:Create(btn, FAST_TWEEN, { BackgroundColor3 = self.theme.ControlHover }):Play()
-			TweenService:Create(stroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0.1 }):Play()
 			self:tintIcon(icon, self.theme.Text)
 		end)
 		btn.MouseLeave:Connect(function()
 			TweenService:Create(btn, FAST_TWEEN, { BackgroundColor3 = self.theme.Control }):Play()
-			TweenService:Create(stroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.25 }):Play()
-			self:tintIcon(icon, self.theme.TextSecondary)
+			self:tintIcon(icon, self.theme.TextMuted)
 		end)
 		btn.MouseButton1Click:Connect(function()
 			applyValue(currentValue + delta, true)
 		end)
 	end
 
-	bindStepBtn(minusBtn, minusStroke, minusIcon, -resolvedStep)
-	bindStepBtn(plusBtn, plusStroke, plusIcon, resolvedStep)
+	bindStepBtn(minusBtn, minusIcon, -resolvedStep)
+	bindStepBtn(plusBtn, plusIcon, resolvedStep)
 
-	-- Direct numeric entry via ValueLabel TextBox
 	valueLabel.Focused:Connect(function()
 		valueLabel.Text = tostring(currentValue)
-		TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0 }):Play()
+		TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.Accent }):Play()
 	end)
 
 	valueLabel.FocusLost:Connect(function()
-		TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle, Transparency = 0.2 }):Play()
+		TweenService:Create(badgeStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
 		local cleaned = valueLabel.Text:gsub("[^%d%.%-]", "")
 		local parsed = tonumber(cleaned)
 		if parsed then
@@ -2293,7 +2238,7 @@ function GUI:addSlider(
 end
 
 function GUI:addTextInput(name: string, placeholder: string?, callback: ((string) -> ())?)
-	local inputHeight = if self.isMobile then 56 else 62
+	local inputHeight = if self.isMobile then 54 else 58
 	local componentId = `{name}_textinput`
 	local currentValue = self:getComponentState(self.currentSidebarName, componentId, "")
 
@@ -2307,57 +2252,57 @@ function GUI:addTextInput(name: string, placeholder: string?, callback: ((string
 	inputFrame.LayoutOrder = self:_nextOrder()
 	inputFrame.Parent = self.contentScrolling
 
-	createCorner(inputFrame, 8)
-	local cardStroke = createStroke(inputFrame, self.theme.BorderSubtle, 1, 0.2)
+	createCorner(inputFrame, 7)
+	local cardStroke = createStroke(inputFrame, self.theme.BorderSubtle, 1, 0)
 
 	local labelName = Instance.new("TextLabel")
 	labelName.Name = "LabelName"
-	labelName.Size = UDim2.new(1, -28, 0, 16)
-	labelName.Position = UDim2.fromOffset(14, 6)
+	labelName.Size = UDim2.new(1, -24, 0, 16)
+	labelName.Position = UDim2.fromOffset(12, 6)
 	labelName.BackgroundTransparency = 1
 	labelName.Text = name
 	labelName.TextColor3 = self.theme.TextSecondary
 	labelName.TextSize = 11
-	labelName.Font = Enum.Font.GothamMedium
+	applyFont(labelName, Fonts.Medium)
 	labelName.TextXAlignment = Enum.TextXAlignment.Left
 	labelName.TextTruncate = Enum.TextTruncate.AtEnd
 	labelName.Parent = inputFrame
 
-	local boxH = if self.isMobile then 26 else 30
+	local boxH = if self.isMobile then 24 else 26
 	local inputContainer = Instance.new("Frame")
 	inputContainer.Name = "InputContainer"
-	inputContainer.Size = UDim2.new(1, -28, 0, boxH)
-	inputContainer.Position = UDim2.new(0, 14, 1, -boxH - 7)
+	inputContainer.Size = UDim2.new(1, -24, 0, boxH)
+	inputContainer.Position = UDim2.new(0, 12, 1, -boxH - 6)
 	inputContainer.BackgroundColor3 = self.theme.Control
 	inputContainer.BorderSizePixel = 0
 	inputContainer.Parent = inputFrame
 
-	createCorner(inputContainer, 6)
-	local containerStroke = createStroke(inputContainer, self.theme.Border, 1, 0.25)
+	createCorner(inputContainer, 5)
+	local containerStroke = createStroke(inputContainer, self.theme.BorderSubtle, 1, 0)
 
 	local textBox = Instance.new("TextBox")
 	textBox.Name = "TextBox"
-	textBox.Size = UDim2.new(1, -20, 1, 0)
-	textBox.Position = UDim2.fromOffset(10, 0)
+	textBox.Size = UDim2.new(1, -18, 1, 0)
+	textBox.Position = UDim2.fromOffset(9, 0)
 	textBox.BackgroundTransparency = 1
 	textBox.Text = currentValue
 	textBox.PlaceholderText = placeholder or `Enter {name:lower()}...`
 	textBox.TextColor3 = self.theme.Text
 	textBox.PlaceholderColor3 = self.theme.TextMuted
-	textBox.TextSize = if self.isMobile then 11 else 12
-	textBox.Font = Enum.Font.Gotham
+	textBox.TextSize = 12
+	applyFont(textBox, Fonts.Regular)
 	textBox.TextXAlignment = Enum.TextXAlignment.Left
 	textBox.ClearTextOnFocus = false
 	textBox.Parent = inputContainer
 
 	textBox.Focused:Connect(function()
-		TweenService:Create(containerStroke, FAST_TWEEN, { Color = self.theme.Accent, Transparency = 0 }):Play()
-		TweenService:Create(labelName, FAST_TWEEN, { TextColor3 = self.theme.Accent }):Play()
+		TweenService:Create(containerStroke, FAST_TWEEN, { Color = self.theme.Accent }):Play()
+		TweenService:Create(labelName, FAST_TWEEN, { TextColor3 = self.theme.Text }):Play()
 		TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.Border }):Play()
 	end)
 
 	textBox.FocusLost:Connect(function()
-		TweenService:Create(containerStroke, FAST_TWEEN, { Color = self.theme.Border, Transparency = 0.25 }):Play()
+		TweenService:Create(containerStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
 		TweenService:Create(labelName, FAST_TWEEN, { TextColor3 = self.theme.TextSecondary }):Play()
 		TweenService:Create(cardStroke, FAST_TWEEN, { Color = self.theme.BorderSubtle }):Play()
 		self:saveComponentState(self.currentSidebarName, componentId, textBox.Text)
@@ -2374,8 +2319,8 @@ function GUI:addTextInput(name: string, placeholder: string?, callback: ((string
 end
 
 function GUI:createDialog(title: string, content: string, buttons: { { any } }?)
-	local dialogW = if self.isMobile then 260 else 300
-	local dialogH = if self.isMobile then 165 else 180
+	local dialogW = if self.isMobile then 260 else 290
+	local dialogH = if self.isMobile then 160 else 172
 
 	local overlay = Instance.new("TextButton")
 	overlay.Name = "DialogOverlay"
@@ -2389,7 +2334,7 @@ function GUI:createDialog(title: string, content: string, buttons: { { any } }?)
 	overlay.ZIndex = 40
 	overlay.Parent = self.screenGui
 
-	TweenService:Create(overlay, FAST_TWEEN, { BackgroundTransparency = 0.45 }):Play()
+	TweenService:Create(overlay, FAST_TWEEN, { BackgroundTransparency = 0.5 }):Play()
 
 	local dialog = Instance.new("TextButton")
 	dialog.Name = "Dialog"
@@ -2404,34 +2349,34 @@ function GUI:createDialog(title: string, content: string, buttons: { { any } }?)
 	dialog.Parent = overlay
 
 	local dialogScale = Instance.new("UIScale")
-	dialogScale.Scale = 0.92
+	dialogScale.Scale = 0.94
 	dialogScale.Parent = dialog
 
-	createCorner(dialog, 10)
-	createStroke(dialog, self.theme.Border, 1, 0.1)
+	createCorner(dialog, 9)
+	createStroke(dialog, self.theme.Border, 1, 0)
 
 	local dialogTitle = Instance.new("TextLabel")
 	dialogTitle.Name = "DialogTitle"
-	dialogTitle.Size = UDim2.new(1, -28, 0, 22)
+	dialogTitle.Size = UDim2.new(1, -28, 0, 20)
 	dialogTitle.Position = UDim2.fromOffset(14, 12)
 	dialogTitle.BackgroundTransparency = 1
 	dialogTitle.Text = title
 	dialogTitle.TextColor3 = self.theme.Text
-	dialogTitle.TextSize = if self.isMobile then 13 else 14
-	dialogTitle.Font = Enum.Font.GothamBold
+	dialogTitle.TextSize = 13
+	applyFont(dialogTitle, Fonts.SemiBold)
 	dialogTitle.TextXAlignment = Enum.TextXAlignment.Left
 	dialogTitle.ZIndex = 42
 	dialogTitle.Parent = dialog
 
 	local dialogContent = Instance.new("TextLabel")
 	dialogContent.Name = "DialogContent"
-	dialogContent.Size = UDim2.new(1, -28, 1, -84)
-	dialogContent.Position = UDim2.fromOffset(14, 38)
+	dialogContent.Size = UDim2.new(1, -28, 1, -82)
+	dialogContent.Position = UDim2.fromOffset(14, 36)
 	dialogContent.BackgroundTransparency = 1
 	dialogContent.Text = content
 	dialogContent.TextColor3 = self.theme.TextSecondary
-	dialogContent.TextSize = if self.isMobile then 11 else 12
-	dialogContent.Font = Enum.Font.Gotham
+	dialogContent.TextSize = 12
+	applyFont(dialogContent, Fonts.Regular)
 	dialogContent.TextXAlignment = Enum.TextXAlignment.Left
 	dialogContent.TextYAlignment = Enum.TextYAlignment.Top
 	dialogContent.TextWrapped = true
@@ -2440,8 +2385,8 @@ function GUI:createDialog(title: string, content: string, buttons: { { any } }?)
 
 	local buttonFrame = Instance.new("Frame")
 	buttonFrame.Name = "ButtonFrame"
-	buttonFrame.Size = UDim2.new(1, -28, 0, 28)
-	buttonFrame.Position = UDim2.new(0, 14, 1, -38)
+	buttonFrame.Size = UDim2.new(1, -28, 0, 26)
+	buttonFrame.Position = UDim2.new(0, 14, 1, -36)
 	buttonFrame.BackgroundTransparency = 1
 	buttonFrame.ZIndex = 42
 	buttonFrame.Parent = dialog
@@ -2462,13 +2407,13 @@ function GUI:createDialog(title: string, content: string, buttons: { { any } }?)
 
 		local dialogButton = Instance.new("TextButton")
 		dialogButton.Name = `DialogButton{i}`
-		dialogButton.Size = UDim2.fromOffset(72, 28)
-		dialogButton.BackgroundColor3 = if isPrimary then self.theme.Accent else self.theme.Surface
+		dialogButton.Size = UDim2.fromOffset(68, 26)
+		dialogButton.BackgroundColor3 = if isPrimary then self.theme.Accent else self.theme.Control
 		dialogButton.BorderSizePixel = 0
 		dialogButton.Text = buttonName
 		dialogButton.TextColor3 = if isPrimary then Color3.fromRGB(255, 255, 255) else self.theme.Text
 		dialogButton.TextSize = 12
-		dialogButton.Font = Enum.Font.GothamMedium
+		applyFont(dialogButton, Fonts.Medium)
 		dialogButton.AutoButtonColor = false
 		dialogButton.LayoutOrder = i
 		dialogButton.ZIndex = 43
@@ -2476,16 +2421,16 @@ function GUI:createDialog(title: string, content: string, buttons: { { any } }?)
 		createCorner(dialogButton, 6)
 
 		if not isPrimary then
-			createStroke(dialogButton, self.theme.Border, 1, 0.2)
+			createStroke(dialogButton, self.theme.BorderSubtle, 1, 0)
 		end
 
 		dialogButton.MouseEnter:Connect(function()
-			local hoverColor = if isPrimary then self.theme.AccentHover else self.theme.SurfaceHover
+			local hoverColor = if isPrimary then self.theme.AccentHover else self.theme.ControlHover
 			TweenService:Create(dialogButton, FAST_TWEEN, { BackgroundColor3 = hoverColor }):Play()
 		end)
 
 		dialogButton.MouseLeave:Connect(function()
-			local normalColor = if isPrimary then self.theme.Accent else self.theme.Surface
+			local normalColor = if isPrimary then self.theme.Accent else self.theme.Control
 			TweenService:Create(dialogButton, FAST_TWEEN, { BackgroundColor3 = normalColor }):Play()
 		end)
 
@@ -2503,7 +2448,7 @@ function GUI:createDialog(title: string, content: string, buttons: { { any } }?)
 		overlay:Destroy()
 	end)
 
-	TweenService:Create(dialogScale, SPRING_TWEEN, { Scale = 1 }):Play()
+	TweenService:Create(dialogScale, SMOOTH_TWEEN, { Scale = 1 }):Play()
 	table.insert(self.dialogs, overlay)
 
 	return overlay
@@ -2512,7 +2457,7 @@ end
 function GUI:_createNotificationHost()
 	self.notificationHost = Instance.new("Frame")
 	self.notificationHost.Name = "Notifications"
-	self.notificationHost.Size = UDim2.new(0, 260, 1, -24)
+	self.notificationHost.Size = UDim2.new(0, 250, 1, -24)
 	self.notificationHost.Position = UDim2.new(1, -12, 0, 12)
 	self.notificationHost.AnchorPoint = Vector2.new(1, 0)
 	self.notificationHost.BackgroundTransparency = 1
@@ -2533,16 +2478,16 @@ function GUI:notify(title: string, message: string, duration: number?)
 	end
 	local toast = Instance.new("Frame")
 	toast.Name = "Toast"
-	toast.Size = UDim2.fromOffset(250, 56)
+	toast.Size = UDim2.fromOffset(240, 52)
 	toast.BackgroundColor3 = self.theme.Sidebar
 	toast.BorderSizePixel = 0
 	toast.ZIndex = 61
 	toast.Parent = self.notificationHost
 	createCorner(toast, 8)
-	createStroke(toast, self.theme.Border, 1, 0.1)
+	createStroke(toast, self.theme.Border, 1, 0)
 
 	local accentBar = Instance.new("Frame")
-	accentBar.Size = UDim2.new(0, 3, 1, -16)
+	accentBar.Size = UDim2.new(0, 2, 1, -16)
 	accentBar.Position = UDim2.fromOffset(8, 8)
 	accentBar.BackgroundColor3 = self.theme.Accent
 	accentBar.BorderSizePixel = 0
@@ -2551,39 +2496,39 @@ function GUI:notify(title: string, message: string, duration: number?)
 	createCorner(accentBar, 2)
 
 	local tLabel = Instance.new("TextLabel")
-	tLabel.Size = UDim2.new(1, -28, 0, 18)
-	tLabel.Position = UDim2.fromOffset(18, 8)
+	tLabel.Size = UDim2.new(1, -26, 0, 16)
+	tLabel.Position = UDim2.fromOffset(16, 8)
 	tLabel.BackgroundTransparency = 1
 	tLabel.Text = title
 	tLabel.TextColor3 = self.theme.Text
 	tLabel.TextSize = 12
-	tLabel.Font = Enum.Font.GothamBold
+	applyFont(tLabel, Fonts.SemiBold)
 	tLabel.TextXAlignment = Enum.TextXAlignment.Left
 	tLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	tLabel.ZIndex = 62
 	tLabel.Parent = toast
 
 	local mLabel = Instance.new("TextLabel")
-	mLabel.Size = UDim2.new(1, -28, 0, 22)
-	mLabel.Position = UDim2.fromOffset(18, 26)
+	mLabel.Size = UDim2.new(1, -26, 0, 20)
+	mLabel.Position = UDim2.fromOffset(16, 24)
 	mLabel.BackgroundTransparency = 1
 	mLabel.Text = message
 	mLabel.TextColor3 = self.theme.TextSecondary
 	mLabel.TextSize = 11
-	mLabel.Font = Enum.Font.Gotham
+	applyFont(mLabel, Fonts.Regular)
 	mLabel.TextXAlignment = Enum.TextXAlignment.Left
 	mLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	mLabel.ZIndex = 62
 	mLabel.Parent = toast
 
 	local toastScale = Instance.new("UIScale")
-	toastScale.Scale = 0.9
+	toastScale.Scale = 0.92
 	toastScale.Parent = toast
-	TweenService:Create(toastScale, SPRING_TWEEN, { Scale = 1 }):Play()
+	TweenService:Create(toastScale, SMOOTH_TWEEN, { Scale = 1 }):Play()
 
 	task.delay(duration or 3, function()
 		if toast and toast.Parent then
-			local out = TweenService:Create(toastScale, FAST_TWEEN, { Scale = 0.85 })
+			local out = TweenService:Create(toastScale, FAST_TWEEN, { Scale = 0.88 })
 			TweenService:Create(toast, FAST_TWEEN, { BackgroundTransparency = 1 }):Play()
 			out:Play()
 			out.Completed:Connect(function()
@@ -2639,11 +2584,9 @@ function GUI:makeDraggable()
 				local clampedX = math.clamp(rawX, halfW + 6, math.max(halfW + 6, vp.X - halfW - 6))
 				local clampedY = math.clamp(rawY, halfH + 6, math.max(halfH + 6, vp.Y - halfH - 6))
 
-				local newPos = UDim2.fromOffset(clampedX, clampedY)
-				self.mainFrame.Position = newPos
-				if self.shadowFrame then
-					self.shadowFrame.Position = UDim2.fromOffset(clampedX, clampedY + 3)
-				end
+				TweenService:Create(self.mainFrame, INSTANT_TWEEN, {
+					Position = UDim2.fromOffset(clampedX, clampedY),
+				}):Play()
 			end
 		end)
 	)
